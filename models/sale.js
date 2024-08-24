@@ -4,11 +4,6 @@ const sequelize = require("../config/dbConfig");
 class Sale extends Model {}
 Sale.init(
   {
-    serial: {
-      type: DataTypes.BIGINT,
-      unique: true,
-      autoIncrement: true,
-    },
     quantity: {
       type: DataTypes.INTEGER,
       defaultValue: 1,
