@@ -30,7 +30,7 @@ Este proyecto es un sistema de control de inventario diseñado específicamente 
 1. Clona el repositorio:
 
 ```bash
-git clone https://github.com/Draekk/inventory-management-system/issues
+git clone https://github.com/Draekk/inventory-management-system
 ```
 
 2. Navega al directorio del proyecto:
