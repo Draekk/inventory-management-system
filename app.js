@@ -12,6 +12,6 @@ app.listen(PORT, () =>
   console.log(`Servidor ejecutandose en el puerto: ${PORT}...`)
 );
 
-app.get("/", (req, res) => {
+app.get("/", async (req, res) => {
   return res.send("Hello world");
 });
