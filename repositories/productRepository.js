@@ -37,7 +37,7 @@ const saveProduct = async ({ barcode, name, stock, costPrice, salePrice }) => {
  * @param { number } product.stock - Cantidad disponible del producto.
  * @param { number } product.costPrice - Precio de costo del producto.
  * @param { number } product.salePrice - Precio de venta del producto.
- * @returns { [number] } Un arreglo con el numero de filas afectadas.
+ * @returns { Promise<number|null> } Un arreglo con el numero de filas afectadas.
  */
 const updateProduct = async ({
   id,
@@ -73,7 +73,7 @@ const updateProduct = async ({
 
 /**
  * Obtiene una lista de todos los productos de la base de datos.
- * @returns {Promise<Product[]>} Una promesa con una lista de productos o null si ocurre un error.
+ * @returns {Promise<Product[]|null>} Una promesa con una lista de productos o null si ocurre un error.
  */
 const findProducts = async () => {
   try {
@@ -104,7 +104,7 @@ const findProductById = async (id) => {
 /**
  * Obtiene una lista con los productos con nombre similar al nombre otorgado como argumento.
  * @param {string} name Nombre de los productos a buscar.
- * @returns {Promise<Product[]>} Una lista de productos encontrados o null si ocurre un error.
+ * @returns {Promise<Product[]|null>} Una lista de productos encontrados o null si ocurre un error.
  */
 const findProductsByName = async (name) => {
   try {
@@ -123,10 +123,31 @@ const findProductsByName = async (name) => {
   }
 };
 
+/**
+ * Elimina un producto con el ID igual al ID que se le otorga como argumento.
+ * @param {number} id ID del producto a eliminar.
+ * @returns {Promise<number|null>} El numero de filas afectadas o null si ocurre un error.
+ */
+const deleteProductById = async (id) => {
+  try {
+    const data = await Product.destroy({
+      where: {
+        id,
+      },
+    });
+    if (data === 0) return null;
+    return data;
+  } catch (err) {
+    console.error("Error eliminando el producto:", err);
+    return null;
+  }
+};
+
 module.exports = {
   saveProduct,
   updateProduct,
   findProducts,
   findProductById,
   findProductsByName,
+  deleteProductById,
 };
