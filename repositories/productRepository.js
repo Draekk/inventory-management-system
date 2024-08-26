@@ -63,6 +63,7 @@ const updateProduct = async ({
       }
     );
 
+    if (data[0] === 0) return null;
     return data;
   } catch (err) {
     console.error("Error al actualizar el producto:", err);
@@ -77,6 +78,7 @@ const updateProduct = async ({
 const findProducts = async () => {
   try {
     const data = await Product.findAll();
+    if (data.length === 0) return null;
     return data;
   } catch (err) {
     console.error("Error al obtener los productos:", err);
@@ -99,9 +101,32 @@ const findProductById = async (id) => {
   }
 };
 
+/**
+ * Obtiene una lista con los productos con nombre similar al nombre otorgado como argumento.
+ * @param {string} name Nombre de los productos a buscar.
+ * @returns {Promise<Product[]>} Una lista de productos encontrados o null si ocurre un error.
+ */
+const findProductsByName = async (name) => {
+  try {
+    const data = await Product.findAll({
+      where: {
+        name: {
+          [Op.substring]: name,
+        },
+      },
+    });
+    if (data.length === 0) return null;
+    return data;
+  } catch (err) {
+    console.error("Error encontrando los productos:", err);
+    return null;
+  }
+};
+
 module.exports = {
   saveProduct,
   updateProduct,
   findProducts,
   findProductById,
+  findProductsByName,
 };
