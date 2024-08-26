@@ -77,9 +77,26 @@ const findProductById = async (id) => {
   }
 };
 
+/**
+ * Obtiene una lista con los productos con nombre similar al nombre otorgado como argumento desde el repositorio.
+ * @param {string} name Nombre de los productos a buscar.
+ * @returns {Product[]|null} Una lista de productos encontrados o null si ocurre un error.
+ */
+const findProductsByName = async (name) => {
+  try {
+    const products = await rep.findProductsByName(name);
+    if (products) return products;
+    return null;
+  } catch (err) {
+    console.error("Error desde el servicio - findProductsByName:", err);
+    return null;
+  }
+};
+
 module.exports = {
   saveProduct,
   updateProduct,
   findProducts,
   findProductById,
+  findProductsByName,
 };
