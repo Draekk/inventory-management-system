@@ -93,10 +93,26 @@ const findProductsByName = async (name) => {
   }
 };
 
+/**
+ * Elimina un producto con el ID igual al ID que se le otorga como argumento.
+ * @param {number} id ID del producto a eliminar.
+ * @returns {number} El numero de filas afectadas o null si ocurre un error.
+ */
+const deleteProductById = async (id) => {
+  try {
+    const affectedRows = await rep.deleteProductById(id);
+    return affectedRows;
+  } catch (err) {
+    console.error("Error desde el servicio - deleteProductById:", err);
+    return 0;
+  }
+};
+
 module.exports = {
   saveProduct,
   updateProduct,
   findProducts,
   findProductById,
   findProductsByName,
+  deleteProductById,
 };

@@ -125,7 +125,7 @@ const findProductsByName = async (name) => {
 /**
  * Elimina un producto con el ID igual al ID que se le otorga como argumento.
  * @param {number} id ID del producto a eliminar.
- * @returns {Promise<number|null>} El numero de filas afectadas o null si ocurre un error.
+ * @returns {number} El numero de filas afectadas o null si ocurre un error.
  */
 const deleteProductById = async (id) => {
   try {
@@ -134,11 +134,10 @@ const deleteProductById = async (id) => {
         id,
       },
     });
-    if (data === 0) return null;
     return data;
   } catch (err) {
     console.error("Error eliminando el producto:", err);
-    return null;
+    return 0;
   }
 };
 
