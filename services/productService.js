@@ -61,8 +61,25 @@ const findProducts = async () => {
   }
 };
 
+/**
+ * Obtiene un producto cuyo ID sea igual al ID enviado como argumento al repositorio.
+ * @param {number} id ID del producto a buscar.
+ * @returns {Product|null} El producto encontrado o null si ocurre un error.
+ */
+const findProductById = async (id) => {
+  try {
+    const product = await rep.findProductById(id);
+    if (product) return product.toJSON();
+    return null;
+  } catch (err) {
+    console.error("Error desde el servicio - findProductById:", err);
+    return null;
+  }
+};
+
 module.exports = {
   saveProduct,
   updateProduct,
   findProducts,
+  findProductById,
 };
