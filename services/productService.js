@@ -45,7 +45,24 @@ const updateProduct = async (productDetail) => {
   }
 };
 
+/**
+ * Obtiene una lista del repositorio con todos los productos de la base de datos.
+ * @returns {Product[]|null} Una lista de productos o null si ocurre un error.
+ */
+const findProducts = async () => {
+  try {
+    const products = await rep.findProducts();
+    console.debug(products);
+    if (products) return products;
+    return null;
+  } catch (err) {
+    console.error("Error desde el servicio - findProducts:", err);
+    return null;
+  }
+};
+
 module.exports = {
   saveProduct,
   updateProduct,
+  findProducts,
 };
