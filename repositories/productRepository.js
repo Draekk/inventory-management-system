@@ -29,7 +29,7 @@ const saveProduct = async ({ barcode, name, stock, costPrice, salePrice }) => {
 };
 
 /**
- * Actualiza un producto existente en la base de datos
+ * Actualiza un producto existente en la base de datos.
  * @param { Product } product - Propiedades del producto.
  * @param { number } product.id - ID del producto.
  * @param { string } product.barcode - Código de barra del producto.
@@ -71,8 +71,8 @@ const updateProduct = async ({
 };
 
 /**
- * Obtiene una lista de todos los productos de la base de datos
- * @returns {Promise<Product[]>} Una promesa con una lista de productos
+ * Obtiene una lista de todos los productos de la base de datos.
+ * @returns {Promise<Product[]>} Una promesa con una lista de productos o null si ocurre un error.
  */
 const findProducts = async () => {
   try {
@@ -84,8 +84,24 @@ const findProducts = async () => {
   }
 };
 
+/**
+ * Obtiene un producto cuyo ID sea igual al ID enviado como argumento.
+ * @param {number} id ID del producto a buscar.
+ * @returns {Promise<Product|null>} El producto encontrado o null si ocurre un error.
+ */
+const findProductById = async (id) => {
+  try {
+    const data = await Product.findByPk(id);
+    return data;
+  } catch (err) {
+    console.error("Error encontrando el id del producto:", err);
+    return null;
+  }
+};
+
 module.exports = {
   saveProduct,
   updateProduct,
   findProducts,
+  findProductById,
 };
