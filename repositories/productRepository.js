@@ -63,8 +63,7 @@ const updateProduct = async ({
       }
     );
 
-    if (data[0] === 0) return null;
-    return data;
+    return data[0];
   } catch (err) {
     console.error("Error al actualizar el producto:", err);
     return null;

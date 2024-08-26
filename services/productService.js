@@ -22,6 +22,30 @@ const saveProduct = async (productDetail) => {
   }
 };
 
+/**
+ * Crea un modelo Product con un ID y lo envía al repositorio.
+ * @param {Object} productDetail Objeto con los parametros del producto.
+ * @param {number} productDetail.id ID del producto a modificar.
+ * @param {string} productDetail.barcode Código de barra del producto.
+ * @param {string} productDetail.name Nombre del producto.
+ * @param {number} productDetail.stock Cantidad disponible del producto.
+ * @param {number} productDetail.costPrice Precio de costo del producto.
+ * @param {number} productDetail.salePrice Precio de venta del producto.
+ * @returns {Object|null} Un objeto con las propiedades del producto actualizado, o null si ocurrió un error.
+ */
+const updateProduct = async (productDetail) => {
+  try {
+    const product = Product.build(productDetail);
+    const affectedRows = await rep.updateProduct(productDetail);
+    if (affectedRows[0] === 1) return product.toJSON();
+    return null;
+  } catch (err) {
+    console.error("Error desde el servicio - updateProduct:", err);
+    return null;
+  }
+};
+
 module.exports = {
   saveProduct,
+  updateProduct,
 };
