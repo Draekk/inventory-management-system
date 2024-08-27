@@ -37,7 +37,7 @@ const updateProduct = async (productDetail) => {
   try {
     const product = Product.build(productDetail);
     const affectedRows = await rep.updateProduct(productDetail);
-    if (affectedRows[0] === 1) return product.toJSON();
+    if (affectedRows === 1) return product;
     return null;
   } catch (err) {
     console.error("Error desde el servicio - updateProduct:", err);
