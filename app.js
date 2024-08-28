@@ -16,14 +16,14 @@ app.listen(PORT, () =>
 );
 
 app.get("/", async (req, res) => {
-  const product = {
-    id: 36,
-    barcode: "1447",
-    name: "foobar34",
-    stock: 20,
-    costPrice: 3453,
-    salePrice: 7580,
-  };
-  req.body = product;
-  await controller.updateProduct(req, res);
+  // const product = {
+  //   id: 36,
+  //   barcode: "1447",
+  //   name: "foobar34",
+  //   stock: 20,
+  //   costPrice: 3453,
+  //   salePrice: 7580,
+  // };
+  // req.body = product;
+  await controller.findProducts(req, res);
 });

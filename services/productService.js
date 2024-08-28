@@ -57,7 +57,6 @@ const updateProduct = async (productDetail) => {
 const findProducts = async () => {
   try {
     const products = await rep.findProducts();
-    console.debug(products);
     if (products) return products;
     throw new NotFoundError("Productos no encontrados");
   } catch (err) {

@@ -58,7 +58,31 @@ const updateProduct = async (req, res) => {
   }
 };
 
+/**
+ * Obtiene una lista del servicio con todos los productos de la base de datos.
+ * @returns {Object} Una respuesta con lista de productos.
+ */
+const findProducts = async (req, res) => {
+  try {
+    const data = await serv.findProducts();
+    if (data instanceof NotFoundError)
+      return res.status(404).json(createBadRes(data));
+    else if (data instanceof GenericError)
+      return res.status(500).json(createBadRes(data));
+    return res.status(200).json(createRes("Productos encontrados", data));
+  } catch (err) {
+    return res
+      .status(500)
+      .json(
+        createBadRes(
+          new GenericError("Error en la capa Controladora.", err.message)
+        )
+      );
+  }
+};
+
 module.exports = {
   saveProduct,
   updateProduct,
+  findProducts,
 };
