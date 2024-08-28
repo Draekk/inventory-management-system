@@ -59,8 +59,10 @@ const updateProduct = async (req, res) => {
 };
 
 /**
- * Obtiene una lista del servicio con todos los productos de la base de datos.
- * @returns {Object} Una respuesta con lista de productos.
+ * Obtiene una lista de producto del servicio, y lo devuelve como un json dentro de la respuesta
+ * @param {Request} req
+ * @param {Response} res
+ * @returns {Response} Una respuesta con el resultado
  */
 const findProducts = async (req, res) => {
   try {
@@ -81,8 +83,37 @@ const findProducts = async (req, res) => {
   }
 };
 
+/**
+ * Extrae un valor `id` del request y lo envía al servicio,
+ * si el `id` existe en la base de dato, obtendrá un producto y lo
+ * enviará como respuesta.
+ * @param {Request} req
+ * @param {Response} res
+ * @returns {Response} Una respuesta con el resultado
+ */
+const findProductById = async (req, res) => {
+  try {
+    const id = req.params.id;
+    const data = await serv.findProductById(id);
+    if (data instanceof NotFoundError)
+      return res.status(404).json(createBadRes(data));
+    else if (data instanceof GenericError)
+      return res.status(500).json(createBadRes(data));
+    return res.status(200).json(createRes("Producto encontrado.", data));
+  } catch (err) {
+    return res
+      .status(500)
+      .json(
+        createBadRes(
+          new GenericError("Error en la capa Controladora.", err.message)
+        )
+      );
+  }
+};
+
 module.exports = {
   saveProduct,
   updateProduct,
   findProducts,
+  findProductById,
 };
