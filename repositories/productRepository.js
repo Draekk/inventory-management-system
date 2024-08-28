@@ -1,5 +1,6 @@
 const { Op } = require("sequelize");
 const { Product } = require("../models");
+const { ValidationError, GenericError } = require("../errors/errorHandler");
 
 /**
  * Guarda un nuevo producto en la base de datos
@@ -21,10 +22,15 @@ const saveProduct = async ({ barcode, name, stock, costPrice, salePrice }) => {
       salePrice,
     });
 
-    return data;
+    if (data) return data;
   } catch (err) {
-    console.error("Error al crear el producto:", err);
-    return null;
+    if (err.name === "SequelizeUniqueConstraintError") {
+      return new ValidationError(
+        "Error: el barcode debe ser único",
+        err.message
+      );
+    }
+    return new GenericError("Error en la capa Repositorio.", err);
   }
 };
 

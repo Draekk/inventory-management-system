@@ -1,30 +1,31 @@
 /**
  * Crea una respuesta con datos personalizados.
  * @param {string} message Mensaje de la respuesta.
- * @param {boolean} success Si la respuesta es exitosa.
  * @param {Object} data Objeto a enviar dentro de la respuesta.
- * @param {boolean} error Si ocurrió un error.
  * @returns {Object}
  */
-const createResponse = (
-  message,
-  success = false,
-  data = null,
-  error = false
-) => {
-  if (error) {
-    return {
-      error,
-      message,
-    };
-  }
+const createRes = (message, data = null) => {
   return {
-    success,
+    success: true,
     message,
     data,
   };
 };
 
+/**
+ * Crea una respuesta con un error.
+ * @param {Object} error Error que se enviará como propiedad
+ * @returns {Object}
+ */
+const createBadRes = (error) => {
+  return {
+    success: false,
+    message: error.message,
+    error: error,
+  };
+};
+
 module.exports = {
-  createResponse,
+  createRes,
+  createBadRes,
 };

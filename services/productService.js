@@ -1,5 +1,6 @@
 const rep = require("../repositories/productRepository");
 const { Product } = require("../models");
+const { GenericError } = require("../errors/errorHandler");
 
 /**
  * Crea un nuevo modelo Product y lo envía al repositorio.
@@ -14,11 +15,10 @@ const { Product } = require("../models");
 const saveProduct = async (productDetail) => {
   try {
     const product = Product.build(productDetail);
-    const savedProduct = await rep.saveProduct(product);
-    return savedProduct.toJSON();
+    const data = await rep.saveProduct(product);
+    return data;
   } catch (err) {
-    console.error("Error desde el servicio - saveProduct:", err);
-    return null;
+    return new GenericError("Error en la capa Servicios.", err.message);
   }
 };
 

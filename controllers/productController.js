@@ -1,5 +1,6 @@
+const { GenericError } = require("../errors/errorHandler");
 const serv = require("../services/productService");
-const { createResponse } = require("../utils/responseFactory");
+const { createRes, createBadRes } = require("../utils/responseFactory");
 
 /**
  * Extrae el producto del request y lo envía al servicio para crear un nuevo producto.
@@ -7,20 +8,25 @@ const { createResponse } = require("../utils/responseFactory");
  * @param {Object} res Response
  * @returns {Object} Response con la data obtenida del servicio
  */
-const savedProduct = async (req, res) => {
+const saveProduct = async (req, res) => {
   try {
     const product = req.body;
     const data = await serv.saveProduct(product);
-    if (data) {
+    console.log(data);
+    if (data.hasOwnProperty("error"))
+      return res.status(500).json(createBadRes(data));
+    else
       return res
         .status(202)
-        .json(createResponse("Producto creado exitósamente", true, data));
-    }
-    return res
-      .status(404)
-      .json(createResponse("Producto no ha sido creado.", false));
+        .json(createRes("Producto creado exitósamente", data));
   } catch (err) {
-    return res.status(500).json(createResponse(err.message, false, null, true));
+    return res
+      .status(500)
+      .json(
+        createBadRes(
+          new GenericError("Error en la capa Controladora:", err.message)
+        )
+      );
   }
 };
 
@@ -38,17 +44,15 @@ const updateProduct = async (req, res) => {
     if (data) {
       return res
         .status(202)
-        .json(
-          createResponse("Producto actualizado correctamente.", true, data)
-        );
+        .json(createRes("Producto actualizado correctamente.", true, data));
     }
-    return res.status(404).json(createResponse("Producto no encontrado."));
+    return res.status(404).json(createRes("Producto no encontrado."));
   } catch (err) {
-    return res.status(500).json(createResponse(err.message, false, null, true));
+    return res.status(500).json(createRes(err.message, false, null, true));
   }
 };
 
 module.exports = {
-  savedProduct,
+  saveProduct,
   updateProduct,
 };
