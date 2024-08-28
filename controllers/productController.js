@@ -149,10 +149,42 @@ const findProductsByName = async (req, res) => {
   }
 };
 
+/**
+ * Elimina un producto de la base de datos basado en su ID.
+ *
+ * @param {Object} req - Objeto de solicitud (Request) de Express.
+ * @param {Object} req.params - Objeto que contiene los parámetros de la solicitud.
+ * @param {string} req.params.id - ID del producto que se desea eliminar.
+ * @param {Object} res - Objeto de respuesta (Response) de Express.
+ * @returns {Promise<void>} Retorna una respuesta HTTP con el resultado de la operación.
+ */
+const deleteProductById = async (req, res) => {
+  try {
+    const id = req.params.id;
+    const data = await serv.deleteProductById(id);
+    if (data instanceof NotFoundError)
+      return res.status(404).json(createBadRes(data));
+    else if (data instanceof GenericError)
+      return res.status(500).json(createBadRes(data));
+    return res
+      .status(200)
+      .json(createRes(`Eliminado el producto con el ID: ${id}.`));
+  } catch (err) {
+    return res
+      .status(500)
+      .json(
+        createBadRes(
+          new GenericError("Error en la capa Controladora.", err.message)
+        )
+      );
+  }
+};
+
 module.exports = {
   saveProduct,
   updateProduct,
   findProducts,
   findProductById,
   findProductsByName,
+  deleteProductById,
 };
