@@ -17,6 +17,7 @@ app.listen(PORT, () =>
 
 app.get("/", async (req, res) => {
   const product = {
+    id: 36,
     barcode: "1447",
     name: "foobar34",
     stock: 20,
@@ -24,5 +25,5 @@ app.get("/", async (req, res) => {
     salePrice: 7580,
   };
   req.body = product;
-  await controller.saveProduct(req, res);
+  await controller.updateProduct(req, res);
 });

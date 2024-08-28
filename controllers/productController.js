@@ -1,4 +1,4 @@
-const { GenericError } = require("../errors/errorHandler");
+const { GenericError, NotFoundError } = require("../errors/errorHandler");
 const serv = require("../services/productService");
 const { createRes, createBadRes } = require("../utils/responseFactory");
 
@@ -40,15 +40,21 @@ const updateProduct = async (req, res) => {
   try {
     const product = req.body;
     const data = await serv.updateProduct(product);
-    console.debug(data);
-    if (data) {
-      return res
-        .status(202)
-        .json(createRes("Producto actualizado correctamente.", true, data));
-    }
-    return res.status(404).json(createRes("Producto no encontrado."));
+    if (data instanceof NotFoundError)
+      return res.status(404).json(createBadRes(data));
+    else if (data instanceof GenericError)
+      return res.status(500).json(createBadRes(data));
+    return res
+      .status(202)
+      .json(createRes("Producto actualizado correctamente.", data));
   } catch (err) {
-    return res.status(500).json(createRes(err.message, false, null, true));
+    return res
+      .status(500)
+      .json(
+        createBadRes(
+          new GenericError("Error en la capa Controladora", err.message)
+        )
+      );
   }
 };
 
