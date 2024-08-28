@@ -1,5 +1,10 @@
 const { Op } = require("sequelize");
 const { Product } = require("../models");
+const {
+  ValidationError,
+  GenericError,
+  NotFoundError,
+} = require("../errors/errorHandler");
 
 /**
  * Guarda un nuevo producto en la base de datos
@@ -21,10 +26,15 @@ const saveProduct = async ({ barcode, name, stock, costPrice, salePrice }) => {
       salePrice,
     });
 
-    return data;
+    if (data) return data;
   } catch (err) {
-    console.error("Error al crear el producto:", err);
-    return null;
+    if (err.name === "SequelizeUniqueConstraintError") {
+      return new ValidationError(
+        "Error: el barcode debe ser único",
+        err.message
+      );
+    }
+    return new GenericError("Error en la capa Repositorio.", err);
   }
 };
 
@@ -62,11 +72,9 @@ const updateProduct = async ({
         },
       }
     );
-
     return data[0];
   } catch (err) {
-    console.error("Error al actualizar el producto:", err);
-    return null;
+    return new GenericError("Error en la capa Repositorio.", err.message);
   }
 };
 
@@ -77,11 +85,9 @@ const updateProduct = async ({
 const findProducts = async () => {
   try {
     const data = await Product.findAll();
-    if (data.length === 0) return null;
     return data;
   } catch (err) {
-    console.error("Error al obtener los productos:", err);
-    return null;
+    return new GenericError("Error en la capa Repositorio.", err.message);
   }
 };
 
@@ -95,8 +101,7 @@ const findProductById = async (id) => {
     const data = await Product.findByPk(id);
     return data;
   } catch (err) {
-    console.error("Error encontrando el id del producto:", err);
-    return null;
+    return new GenericError("Error en la capa Repositorio", err.message);
   }
 };
 
@@ -114,11 +119,9 @@ const findProductsByName = async (name) => {
         },
       },
     });
-    if (data.length === 0) return null;
     return data;
   } catch (err) {
-    console.error("Error encontrando los productos:", err);
-    return null;
+    return new GenericError("Error en la capa Repositorio.", err.message);
   }
 };
 
@@ -136,8 +139,7 @@ const deleteProductById = async (id) => {
     });
     return data;
   } catch (err) {
-    console.error("Error eliminando el producto:", err);
-    return 0;
+    return new GenericError("Error en la capa Repositorio.", err.message);
   }
 };
 

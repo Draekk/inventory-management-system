@@ -1,5 +1,6 @@
 const rep = require("../repositories/productRepository");
 const { Product } = require("../models");
+const { GenericError, NotFoundError } = require("../errors/errorHandler");
 
 /**
  * Crea un nuevo modelo Product y lo envía al repositorio.
@@ -14,11 +15,10 @@ const { Product } = require("../models");
 const saveProduct = async (productDetail) => {
   try {
     const product = Product.build(productDetail);
-    const savedProduct = await rep.saveProduct(product);
-    return savedProduct.toJSON();
+    const data = await rep.saveProduct(product);
+    return data;
   } catch (err) {
-    console.error("Error desde el servicio - saveProduct:", err);
-    return null;
+    return new GenericError("Error en la capa Servicios.", err.message);
   }
 };
 
@@ -35,13 +35,18 @@ const saveProduct = async (productDetail) => {
  */
 const updateProduct = async (productDetail) => {
   try {
+    const oldProduct = await rep.findProductById(productDetail.id);
+    if (!oldProduct)
+      throw new NotFoundError(
+        `No existe el producto con el ID: ${productDetail.id}.`
+      );
     const product = Product.build(productDetail);
     const affectedRows = await rep.updateProduct(productDetail);
-    if (affectedRows[0] === 1) return product.toJSON();
-    return null;
+    if (affectedRows === 1) return product;
+    throw new Error("No se efectuaron cambios en el producto");
   } catch (err) {
-    console.error("Error desde el servicio - updateProduct:", err);
-    return null;
+    if (err instanceof NotFoundError) return err;
+    return new GenericError("Error en la capa Servicio.", err.message);
   }
 };
 
@@ -52,12 +57,11 @@ const updateProduct = async (productDetail) => {
 const findProducts = async () => {
   try {
     const products = await rep.findProducts();
-    console.debug(products);
     if (products) return products;
-    return null;
+    throw new NotFoundError("Productos no encontrados");
   } catch (err) {
-    console.error("Error desde el servicio - findProducts:", err);
-    return null;
+    if (err instanceof NotFoundError) return err;
+    return new GenericError("Error en la capa Servicio.", err.message);
   }
 };
 
@@ -70,10 +74,10 @@ const findProductById = async (id) => {
   try {
     const product = await rep.findProductById(id);
     if (product) return product.toJSON();
-    return null;
+    throw new NotFoundError(`No existe el producto con el ID: ${id}.`);
   } catch (err) {
-    console.error("Error desde el servicio - findProductById:", err);
-    return null;
+    if (err instanceof NotFoundError) return err;
+    return new GenericError("Error en la capa Servicio.", err.message);
   }
 };
 
@@ -85,11 +89,11 @@ const findProductById = async (id) => {
 const findProductsByName = async (name) => {
   try {
     const products = await rep.findProductsByName(name);
-    if (products) return products;
-    return null;
+    if (products.length > 0) return products;
+    throw new NotFoundError(`No existen productos con el nombre: ${name}.`);
   } catch (err) {
-    console.error("Error desde el servicio - findProductsByName:", err);
-    return null;
+    if (err instanceof NotFoundError) return err;
+    return new GenericError("Error en la capa Servicio.", err.message);
   }
 };
 
@@ -101,10 +105,13 @@ const findProductsByName = async (name) => {
 const deleteProductById = async (id) => {
   try {
     const affectedRows = await rep.deleteProductById(id);
+    if (affectedRows instanceof GenericError) throw affectedRows;
+    if (affectedRows === 0)
+      throw new NotFoundError(`No existe el producto con el ID: ${id}.`);
     return affectedRows;
   } catch (err) {
-    console.error("Error desde el servicio - deleteProductById:", err);
-    return 0;
+    if (err instanceof GenericError || err instanceof NotFoundError) return err;
+    return new GenericError("Error en la capa Servicio.", err.message);
   }
 };
 
