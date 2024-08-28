@@ -3,10 +3,12 @@ const serv = require("../services/productService");
 const { createRes, createBadRes } = require("../utils/responseFactory");
 
 /**
- * Extrae el producto del request y lo envía al servicio para crear un nuevo producto.
- * @param {Object} req Request
- * @param {Object} res Response
- * @returns {Object} Response con la data obtenida del servicio
+ * Guarda un nuevo producto utilizando el servicio y devuelve una respuesta JSON.
+ *
+ * @param {Object} req - El objeto de solicitud.
+ * @param {Object} req.body - El cuerpo de la solicitud que contiene los datos del producto.
+ * @param {Object} res - El objeto de respuesta.
+ * @returns {Promise<Object>} - Una respuesta JSON que contiene el producto creado o un mensaje de error.
  */
 const saveProduct = async (req, res) => {
   try {
@@ -31,10 +33,11 @@ const saveProduct = async (req, res) => {
 };
 
 /**
- * Extrae el producto del request y lo envía al servicio para actualizar un producto.
- * @param {Object} req Request
- * @param {Object} res Response
- * @returns {Object} Response con la data obtenida del servicio
+ * Obtiene una lista de productos del servicio y los devuelve como un JSON dentro de la respuesta.
+ *
+ * @param {Object} req - El objeto de solicitud.
+ * @param {Object} res - El objeto de respuesta.
+ * @returns {Promise<Object>} - Una respuesta JSON que contiene los productos encontrados o un mensaje de error.
  */
 const updateProduct = async (req, res) => {
   try {
@@ -59,10 +62,11 @@ const updateProduct = async (req, res) => {
 };
 
 /**
- * Obtiene una lista de producto del servicio, y lo devuelve como un json dentro de la respuesta
- * @param {Request} req
- * @param {Response} res
- * @returns {Response} Una respuesta con el resultado
+ * Obtiene una lista de productos del servicio y los devuelve como un JSON dentro de la respuesta.
+ *
+ * @param {Object} req - El objeto de solicitud.
+ * @param {Object} res - El objeto de respuesta.
+ * @returns {Promise<Object>} - Una respuesta JSON que contiene los productos encontrados o un mensaje de error.
  */
 const findProducts = async (req, res) => {
   try {
@@ -85,11 +89,14 @@ const findProducts = async (req, res) => {
 
 /**
  * Extrae un valor `id` del request y lo envía al servicio,
- * si el `id` existe en la base de dato, obtendrá un producto y lo
+ * si el `id` existe en la base de datos, obtendrá un producto y lo
  * enviará como respuesta.
- * @param {Request} req
- * @param {Response} res
- * @returns {Response} Una respuesta con el resultado
+ *
+ * @param {Object} req - El objeto de solicitud.
+ * @param {Object} req.params - Los parámetros de la solicitud.
+ * @param {string} req.params.id - El ID del producto a buscar.
+ * @param {Object} res - El objeto de respuesta.
+ * @returns {Promise<Object>} - Una respuesta JSON que contiene el producto encontrado o un mensaje de error.
  */
 const findProductById = async (req, res) => {
   try {
@@ -111,9 +118,41 @@ const findProductById = async (req, res) => {
   }
 };
 
+/**
+ * Encuentra productos por su nombre y los devuelve en la respuesta.
+ *
+ * @param {Object} req - El objeto de solicitud.
+ * @param {Object} req.params - Los parámetros de la solicitud.
+ * @param {string} req.params.name - El nombre del producto a buscar.
+ * @param {Object} res - El objeto de respuesta.
+ * @returns {Promise<Object>} - Una respuesta JSON que contiene los productos encontrados o un mensaje de error.
+ */
+const findProductsByName = async (req, res) => {
+  try {
+    const name = req.params.name;
+    const data = await serv.findProductsByName(name);
+    if (data instanceof NotFoundError)
+      return res.status(404).json(createBadRes(data));
+    else if (data instanceof GenericError)
+      return res.status(500).json(createBadRes(data));
+    return res
+      .status(200)
+      .json(createRes(`Productos encontrados con el nombre: ${name}.`, data));
+  } catch (err) {
+    return res
+      .status(500)
+      .json(
+        createBadRes(
+          new GenericError("Error en la capa Controladora.", err.message)
+        )
+      );
+  }
+};
+
 module.exports = {
   saveProduct,
   updateProduct,
   findProducts,
   findProductById,
+  findProductsByName,
 };

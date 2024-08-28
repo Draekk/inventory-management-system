@@ -89,7 +89,7 @@ const findProductById = async (id) => {
 const findProductsByName = async (name) => {
   try {
     const products = await rep.findProductsByName(name);
-    if (products) return products;
+    if (products.length > 0) return products;
     throw new NotFoundError(`No existen productos con el nombre: ${name}.`);
   } catch (err) {
     if (err instanceof NotFoundError) return err;

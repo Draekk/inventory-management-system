@@ -24,6 +24,6 @@ app.get("/", async (req, res) => {
   //   costPrice: 3453,
   //   salePrice: 7580,
   // };
-  req.params.id = 36;
-  await controller.findProductById(req, res);
+  req.params.name = "gever";
+  await controller.findProductsByName(req, res);
 });
