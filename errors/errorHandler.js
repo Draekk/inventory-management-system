@@ -22,8 +22,17 @@ class GenericError extends Error {
   }
 }
 
+class MiddlewareError extends Error {
+  constructor(message, error = null) {
+    super(message);
+    this.error = error;
+    this.name = "Error de Validación";
+  }
+}
+
 module.exports = {
   ValidationError,
   GenericError,
   NotFoundError,
+  MiddlewareError,
 };
