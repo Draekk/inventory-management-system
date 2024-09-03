@@ -28,6 +28,21 @@ const productValidation = (req, res, next) => {
   }
 };
 
+const idParamValidation = (req, res, next) => {
+  try {
+    const id = parseInt(req.params.id);
+    if (!isNaN(id)) {
+      console.log("im here");
+      next();
+    } else throw new Error("El ID de la URL no es un número válido.");
+  } catch (err) {
+    return res
+      .status(400)
+      .json(createBadRes(new MiddlewareError(err.message, err)));
+  }
+};
+
 module.exports = {
   productValidation,
+  idParamValidation,
 };
