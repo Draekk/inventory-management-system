@@ -106,6 +106,24 @@ const findProductById = async (id) => {
 };
 
 /**
+ * Obtiene un producto de la base de datos que coincidad con el `barcode`
+ * @param {string} barcode Código de barra del producto a buscar
+ * @returns {Promise<Product[]|null>} El producto encontrado o un error si ocurre.
+ */
+const findProductByBarcode = async (barcode) => {
+  try {
+    const data = await Product.findAll({
+      where: {
+        barcode,
+      },
+    });
+    return data;
+  } catch (err) {
+    return new GenericError("Error en la capa Repositorio.", err.message);
+  }
+};
+
+/**
  * Obtiene una lista con los productos con nombre similar al nombre otorgado como argumento.
  * @param {string} name Nombre de los productos a buscar.
  * @returns {Promise<Product[]|null>} Una lista de productos encontrados o null si ocurre un error.
@@ -148,6 +166,7 @@ module.exports = {
   updateProduct,
   findProducts,
   findProductById,
+  findProductByBarcode,
   findProductsByName,
   deleteProductById,
 };

@@ -82,6 +82,22 @@ const findProductById = async (id) => {
 };
 
 /**
+ * Obtiene un producto que coincida con el `barcode` a buscar.
+ * @param {string} barcode Código de barra del producto a buscar.
+ * @returns {Product|null} El producto encontrado o error si no existe.
+ */
+const findProductByBarcode = async (barcode) => {
+  try {
+    const products = await rep.findProductByBarcode(barcode);
+    if (products.length === 1) return products[0].toJSON();
+    throw new NotFoundError(`No existe el producto con el código: ${barcode}.`);
+  } catch (err) {
+    if (err instanceof NotFoundError) return err;
+    return new GenericError("Error en la capa Servicio.", err.message);
+  }
+};
+
+/**
  * Obtiene una lista con los productos con nombre similar al nombre otorgado como argumento desde el repositorio.
  * @param {string} name Nombre de los productos a buscar.
  * @returns {Product[]|null} Una lista de productos encontrados o null si ocurre un error.
@@ -120,6 +136,7 @@ module.exports = {
   updateProduct,
   findProducts,
   findProductById,
+  findProductByBarcode,
   findProductsByName,
   deleteProductById,
 };
