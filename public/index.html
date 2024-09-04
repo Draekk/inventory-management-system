@@ -6,6 +6,44 @@
     <title>Index</title>
   </head>
   <body>
-    <h1>Hello world</h1>
+    <div class="find-all" style="border: solid 0.1px black; padding: 10px">
+      <h2>Buscar todos</h2>
+      <button id="find-all">BUSCAR</button>
+    </div>
+    <div class="find-id" style="border: solid 0.1px black; padding: 10px">
+      <h2>Buscar por ID</h2>
+      <input type="number" placeholder="ID" />
+      <button id="find-id">Buscar</button>
+    </div>
+    <div class="find-name" style="border: solid 0.1px black; padding: 10px">
+      <h2>Buscar por Nombre</h2>
+      <input type="text" placeholder="Nombre" />
+      <button id="find-name">Buscar</button>
+    </div>
+    <div class="delete-id" style="border: solid 0.1px black; padding: 10px">
+      <h2>Borrar por ID</h2>
+      <input type="text" placeholder="ID" />
+      <button id="delete-id">Borrar</button>
+    </div>
+    <div class="create" style="border: solid 0.1px black; padding: 10px">
+      <h2>Crear Producto</h2>
+      <input type="text" placeholder="Codigo de barra" />
+      <input type="text" placeholder="Nombre" />
+      <input type="number" placeholder="Cantidad" />
+      <input type="number" placeholder="Precio costo" />
+      <input type="number" placeholder="Precio venta" />
+      <button id="create">Crear</button>
+    </div>
+    <div class="update" style="border: solid 0.1px black; padding: 10px">
+      <h2>Editar Producto</h2>
+      <input type="number" placeholder="ID" />
+      <input type="text" placeholder="Codigo de barra" />
+      <input type="text" placeholder="Nombre" />
+      <input type="number" placeholder="Cantidad" />
+      <input type="number" placeholder="Precio costo" />
+      <input type="number" placeholder="Precio venta" />
+      <button id="update">Crear</button>
+    </div>
   </body>
+  <script src="./scripts/index.js"></script>
 </html>

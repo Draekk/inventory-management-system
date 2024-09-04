@@ -13,12 +13,15 @@ const productValidation = (req, res, next) => {
       "salePrice",
     ];
     const props = Object.keys(req.body);
+    console.log(props);
 
     if (props[0] !== "id") {
       productProps.shift();
+      console.log(productProps);
+      console.log(isEqual(productProps, props));
     }
     if (isEqual(props, productProps)) {
-      next();
+      return next();
     }
     throw new Error("Los parámetros del objeto son incorrectos.");
   } catch (err) {
@@ -32,8 +35,7 @@ const idParamValidation = (req, res, next) => {
   try {
     const id = parseInt(req.params.id);
     if (!isNaN(id)) {
-      console.log("im here");
-      next();
+      return next();
     } else throw new Error("El ID de la URL no es un número válido.");
   } catch (err) {
     return res
