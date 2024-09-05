@@ -44,7 +44,21 @@ const idParamValidation = (req, res, next) => {
   }
 };
 
+const barcodeParamValidation = (req, res, next) => {
+  try {
+    const barcode = req.params.barcode;
+    if (barcode) {
+      return next();
+    } else throw new Error("El ID de la URL no es un número válido.");
+  } catch (err) {
+    return res
+      .status(400)
+      .json(createBadRes(new MiddlewareError(err.message, err)));
+  }
+};
+
 module.exports = {
   productValidation,
   idParamValidation,
+  barcodeParamValidation,
 };

@@ -82,6 +82,22 @@ const findProductById = async (id) => {
 };
 
 /**
+ * Obtiene un producto que coincida con el `barcode` a buscar.
+ * @param {string} barcode Código de barra del producto a buscar.
+ * @returns {Product|null} El producto encontrado o error si no existe.
+ */
+const findProductByBarcode = async (barcode) => {
+  try {
+    const products = await rep.findProductByBarcode(barcode);
+    if (products.length === 1) return products[0].toJSON();
+    throw new NotFoundError(`No existe el producto con el código: ${barcode}.`);
+  } catch (err) {
+    if (err instanceof NotFoundError) return err;
+    return new GenericError("Error en la capa Servicio.", err.message);
+  }
+};
+
+/**
  * Obtiene una lista con los productos con nombre similar al nombre otorgado como argumento desde el repositorio.
  * @param {string} name Nombre de los productos a buscar.
  * @returns {Product[]|null} Una lista de productos encontrados o null si ocurre un error.
@@ -115,11 +131,37 @@ const deleteProductById = async (id) => {
   }
 };
 
+/**
+ * Elimina un producto de la base de datos utilizando su código de barras.
+ *
+ * @async
+ * @function deleteProductByBarcode
+ * @param {string} barcode - Código de barras del producto que se desea eliminar.
+ * @returns {Promise<number|GenericError|NotFoundError>} Retorna el número de productos eliminados si la operación es exitosa, o un error si ocurre un fallo.
+ *
+ * @throws {GenericError} Si ocurre un error en la capa de servicio o en la capa de repositorio.
+ * @throws {NotFoundError} Si el producto con el código de barras proporcionado no existe.
+ */
+const deleteProductByBarcode = async (barcode) => {
+  try {
+    const productsDeleted = await rep.deleteProductByBarcode(barcode);
+    if (productsDeleted instanceof GenericError) throw productsDeleted;
+    else if (productsDeleted === 0)
+      throw NotFoundError(`No existe el producto con el Código: ${barcode}.`);
+    else return productsDeleted;
+  } catch (err) {
+    if (err instanceof GenericError || err instanceof NotFoundError) return err;
+    return new GenericError("Error en la capa Servicio.", err.message);
+  }
+};
+
 module.exports = {
   saveProduct,
   updateProduct,
   findProducts,
   findProductById,
+  findProductByBarcode,
   findProductsByName,
   deleteProductById,
+  deleteProductByBarcode,
 };

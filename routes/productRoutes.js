@@ -3,6 +3,7 @@ const router = express.Router();
 const {
   productValidation,
   idParamValidation,
+  barcodeParamValidation,
 } = require("../middlewares/validationMiddleware");
 const controller = require("../controllers/productController");
 
@@ -10,7 +11,11 @@ router.get("/find/all", controller.findProducts);
 
 router.get("/find/id/:id", idParamValidation, controller.findProductById);
 
-//TODO: find products by barcode
+router.get(
+  "/find/barcode/:barcode",
+  barcodeParamValidation,
+  controller.findProductByBarcode
+);
 
 router.get("/find/name/:name", controller.findProductsByName);
 
@@ -20,7 +25,11 @@ router.delete(
   controller.deleteProductById
 );
 
-//TODO: delete products by barcode
+router.delete(
+  "/delete/barcode/:barcode",
+  barcodeParamValidation,
+  controller.deleteProductByBarcode
+);
 
 router.post("/create", productValidation, controller.saveProduct);
 
