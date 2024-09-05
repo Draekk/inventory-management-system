@@ -213,6 +213,40 @@ const deleteProductById = async (req, res) => {
   }
 };
 
+/**
+ * Elimina un producto de la base de datos utilizando su código de barras, obteniendo el código desde los parámetros de la solicitud.
+ *
+ * @async
+ * @function deleteProductByBarcode
+ * @param {Object} req - Objeto de solicitud (Request) de Express.
+ * @param {Object} req.params - Contiene los parámetros de la solicitud.
+ * @param {string} req.params.barcode - Código de barras del producto que se desea eliminar.
+ * @param {Object} res - Objeto de respuesta (Response) de Express.
+ * @returns {Promise<void>} Retorna una respuesta HTTP con el resultado de la operación.
+ *
+ * @throws {GenericError} Si ocurre un error en la capa controladora o de servicio.
+ * @throws {NotFoundError} Si no se encuentra un producto con el código de barras proporcionado.
+ */
+const deleteProductByBarcode = async (req, res) => {
+  try {
+    const barcode = req.params.barcode;
+    const data = await serv.deleteProductByBarcode(barcode);
+    if (data instanceof NotFoundError)
+      return res.status(404).json(createBadRes(data));
+    else if (data instanceof GenericError)
+      return res.status(500).json(createBadRes(data));
+    else return res.status(200).json(createRes(data));
+  } catch (err) {
+    return res
+      .status(500)
+      .json(
+        createBadRes(
+          new GenericError("Error en la capa Controladora.", err.message)
+        )
+      );
+  }
+};
+
 module.exports = {
   saveProduct,
   updateProduct,
@@ -221,4 +255,5 @@ module.exports = {
   findProductByBarcode,
   findProductsByName,
   deleteProductById,
+  deleteProductByBarcode,
 };

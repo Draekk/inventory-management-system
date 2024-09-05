@@ -131,6 +131,30 @@ const deleteProductById = async (id) => {
   }
 };
 
+/**
+ * Elimina un producto de la base de datos utilizando su código de barras.
+ *
+ * @async
+ * @function deleteProductByBarcode
+ * @param {string} barcode - Código de barras del producto que se desea eliminar.
+ * @returns {Promise<number|GenericError|NotFoundError>} Retorna el número de productos eliminados si la operación es exitosa, o un error si ocurre un fallo.
+ *
+ * @throws {GenericError} Si ocurre un error en la capa de servicio o en la capa de repositorio.
+ * @throws {NotFoundError} Si el producto con el código de barras proporcionado no existe.
+ */
+const deleteProductByBarcode = async (barcode) => {
+  try {
+    const productsDeleted = await rep.deleteProductByBarcode(barcode);
+    if (productsDeleted instanceof GenericError) throw productsDeleted;
+    else if (productsDeleted === 0)
+      throw NotFoundError(`No existe el producto con el Código: ${barcode}.`);
+    else return productsDeleted;
+  } catch (err) {
+    if (err instanceof GenericError || err instanceof NotFoundError) return err;
+    return new GenericError("Error en la capa Servicio.", err.message);
+  }
+};
+
 module.exports = {
   saveProduct,
   updateProduct,
@@ -139,4 +163,5 @@ module.exports = {
   findProductByBarcode,
   findProductsByName,
   deleteProductById,
+  deleteProductByBarcode,
 };

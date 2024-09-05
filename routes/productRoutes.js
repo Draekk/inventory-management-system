@@ -25,7 +25,11 @@ router.delete(
   controller.deleteProductById
 );
 
-//TODO: delete products by barcode
+router.delete(
+  "/delete/barcode/:barcode",
+  barcodeParamValidation,
+  controller.deleteProductByBarcode
+);
 
 router.post("/create", productValidation, controller.saveProduct);
 
