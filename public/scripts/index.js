@@ -22,6 +22,18 @@ getIdBtn.addEventListener("click", async () => {
   console.log(data);
 });
 
+//------------------------------- BUSCAR POR CODIGO
+
+const getBarcodeBtn = document.getElementById("find-barcode");
+const getBarcodeInput = document.querySelector(".find-barcode input");
+
+getBarcodeBtn.addEventListener("click", async () => {
+  const barcode = getBarcodeInput.value;
+  const res = await fetch(`${API}/find/barcode/${barcode}`);
+  const data = await res.json();
+  console.log(data);
+});
+
 //------------------------------- BUSCAR POR NOMBRE
 
 const getNameBtn = document.getElementById("find-name");
@@ -42,6 +54,20 @@ const deleteIdInput = document.querySelector(".delete-id input");
 deleteIdBtn.addEventListener("click", async () => {
   const id = deleteIdInput.value;
   const res = await fetch(`${API}/delete/id/${id}`, {
+    method: "delete",
+  });
+  const data = await res.json();
+  console.log(data);
+});
+
+//-------------------------------- BORRAR POR CODIGO
+
+const deleteBarcodeBtn = document.getElementById("delete-barcode");
+const deleteBarcodeInput = document.querySelector(".delete-barcode input");
+
+deleteBarcodeBtn.addEventListener("click", async () => {
+  const barcode = deleteBarcodeInput.value;
+  const res = await fetch(`${API}/delete/barcode/${barcode}`, {
     method: "delete",
   });
   const data = await res.json();

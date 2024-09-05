@@ -235,7 +235,10 @@ const deleteProductByBarcode = async (req, res) => {
       return res.status(404).json(createBadRes(data));
     else if (data instanceof GenericError)
       return res.status(500).json(createBadRes(data));
-    else return res.status(200).json(createRes(data));
+    else
+      return res
+        .status(200)
+        .json(createRes(`Eliminado el producto con el Código: ${barcode}.`));
   } catch (err) {
     return res
       .status(500)

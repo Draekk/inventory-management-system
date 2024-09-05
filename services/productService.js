@@ -147,7 +147,9 @@ const deleteProductByBarcode = async (barcode) => {
     const productsDeleted = await rep.deleteProductByBarcode(barcode);
     if (productsDeleted instanceof GenericError) throw productsDeleted;
     else if (productsDeleted === 0)
-      throw NotFoundError(`No existe el producto con el Código: ${barcode}.`);
+      throw new NotFoundError(
+        `No existe el producto con el Código: ${barcode}.`
+      );
     else return productsDeleted;
   } catch (err) {
     if (err instanceof GenericError || err instanceof NotFoundError) return err;
