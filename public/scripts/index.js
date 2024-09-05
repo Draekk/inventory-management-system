@@ -127,6 +127,17 @@ updateInputs.id.addEventListener("focusout", async () => {
   updateInputs.salePrice.value = data.data.salePrice;
 });
 
+updateInputs.barcode.addEventListener("focusout", async () => {
+  const barcode = updateInputs.barcode.value;
+  const res = await fetch(`${API}/find/barcode/${barcode}`);
+  const data = await res.json();
+  updateInputs.id.value = data.data.id;
+  updateInputs.name.value = data.data.name;
+  updateInputs.stock.value = data.data.stock;
+  updateInputs.costPrice.value = data.data.costPrice;
+  updateInputs.salePrice.value = data.data.salePrice;
+});
+
 updateBtn.addEventListener("click", async () => {
   const product = {
     id: updateInputs.id.value,

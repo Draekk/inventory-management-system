@@ -139,7 +139,12 @@ const findProductByBarcode = async (req, res) => {
       return res.status(404).json(createBadRes(data));
     else if (data instanceof GenericError)
       return res.status(500).json(createBadRes(data));
-    else return res.status(200).json(createRes(data));
+    else
+      return res
+        .status(200)
+        .json(
+          createRes(`Producto encontrado con el Código: ${barcode}.`, data)
+        );
   } catch (err) {
     return res
       .status(500)
