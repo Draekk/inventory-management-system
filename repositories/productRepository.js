@@ -49,14 +49,10 @@ const saveProduct = async ({ barcode, name, stock, costPrice, salePrice }) => {
  * @param { number } product.salePrice - Precio de venta del producto.
  * @returns { Promise<number|null> } Un arreglo con el numero de filas afectadas.
  */
-const updateProduct = async ({
-  id,
-  barcode,
-  name,
-  stock,
-  costPrice,
-  salePrice,
-}) => {
+const updateProduct = async (
+  { id, barcode, name, stock, costPrice, salePrice },
+  transaction = null
+) => {
   try {
     const data = await Product.update(
       {
@@ -70,6 +66,7 @@ const updateProduct = async ({
         where: {
           id,
         },
+        transaction,
       }
     );
     return data[0];
