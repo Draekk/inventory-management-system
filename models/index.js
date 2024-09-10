@@ -2,8 +2,6 @@ const { Product } = require("./product");
 const { Sale } = require("./sale");
 const sequelize = require("../config/dbConfig");
 
-const ProductSale = sequelize.models.products_sales;
-
 //Relaciones de los modelos
 Product.belongsToMany(Sale, {
   through: "products_sales",
@@ -26,5 +24,7 @@ sequelize
   .sync()
   .then(() => console.log("Tablas sincronizadas exitósamente."))
   .catch((err) => console.error("Error sincronizando las tablas...", err));
+
+const ProductSale = sequelize.models.products_sales;
 
 module.exports = { Product, Sale, ProductSale };
