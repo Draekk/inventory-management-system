@@ -1,5 +1,5 @@
 const { GenericError } = require("../errors/errorHandler");
-const { Sale } = require("../models");
+const { Sale, Product, ProductSale } = require("../models");
 
 /**
  * Crea un registro de venta en la base de datos.
@@ -33,6 +33,37 @@ const createSale = async ({ quantity, total, isCash }, transaction = null) => {
   }
 };
 
+/**
+ * Busca todas las ventas en la base de datos, opcionalmente incluyendo los productos relacionados.
+ *
+ * @async
+ * @function findSales
+ * @param {boolean} [withProducts=false] - Indica si se deben incluir los productos asociados a las ventas.
+ * @param {Object} [transaction=null] - Objeto de transacción de Sequelize para asegurar la atomicidad de la operación (opcional).
+ * @returns {Promise<Object[]|GenericError>} Retorna una lista de ventas o un error si ocurre una falla.
+ *
+ * @throws {GenericError} Si ocurre un error al consultar las ventas en la base de datos.
+ */
+const findSales = async (withProducts = false, transaction = null) => {
+  try {
+    let data = null;
+    if (withProducts) {
+      data = await Sale.findAll({
+        include: [Product],
+        transaction,
+      });
+    } else {
+      data = await Sale.findAll({
+        transaction,
+      });
+    }
+    return data;
+  } catch (err) {
+    throw err;
+  }
+};
+
 module.exports = {
   createSale,
+  findSales,
 };

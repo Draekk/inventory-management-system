@@ -1,4 +1,4 @@
-const { isEqual } = require("lodash");
+const { isEqual, isBoolean } = require("lodash");
 const { MiddlewareError } = require("../errors/errorHandler");
 const { createBadRes } = require("../utils/responseFactory");
 
@@ -152,9 +152,40 @@ const createSaleValidation = (req, res, next) => {
   }
 };
 
+/**
+ * Middleware que valida si la propiedad 'withProducts' del cuerpo de la solicitud es un booleano.
+ *
+ * @function findSalesWithProductsValidation
+ * @param {Object} req - El objeto de solicitud HTTP.
+ * @param {Object} req.body - El cuerpo de la solicitud.
+ * @param {boolean} req.body.withProducts - Indica si se deben incluir los productos asociados a las ventas.
+ * @param {Object} res - El objeto de respuesta HTTP.
+ * @param {Function} next - La función que llama al siguiente middleware si la validación es exitosa.
+ *
+ * @returns {Object|void} Si la validación falla, responde con un error 400. Si es exitosa, llama a `next()`.
+ *
+ * @throws {MiddlewareError} Si la propiedad 'withProducts' no es de tipo booleano o no existe.
+ */
+const findSalesWithProductsValidation = (req, res, next) => {
+  try {
+    const { withProducts } = req.body;
+
+    if (isBoolean(withProducts)) return next();
+    else
+      throw new Error(
+        "La propiedad en el body debe ser 'withProducts' y debe ser de tipo 'boolean'."
+      );
+  } catch (err) {
+    return res
+      .status(400)
+      .json(createBadRes(new MiddlewareError(err.message, err)));
+  }
+};
+
 module.exports = {
   productValidation,
   idParamValidation,
   barcodeParamValidation,
   createSaleValidation,
+  findSalesWithProductsValidation,
 };

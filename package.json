@@ -18,7 +18,7 @@
   "homepage": "https://github.com/Draekk/inventory-management-system#readme",
   "dependencies": {
     "dotenv": "^16.4.5",
-    "express": "^4.19.2",
+    "express": "^4.20.0",
     "lodash": "^4.17.21",
     "mysql2": "^3.11.0",
     "sequelize": "^6.37.3"

@@ -30,13 +30,8 @@ const dateFormatter = (date) => {
  * @returns {Object} Un nuevo objeto de venta con la fecha formateada.
  */
 const saleDateFormatter = (sale) => {
-  return {
-    id: sale.id,
-    quantity: sale.quantity,
-    total: sale.total,
-    isCash: sale.isCash,
-    date: dateFormatter(sale.createdAt),
-  };
+  sale.dataValues.createdAt = dateFormatter(sale.createdAt);
+  return sale;
 };
 
 module.exports = {

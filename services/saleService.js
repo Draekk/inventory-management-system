@@ -63,6 +63,43 @@ const createSale = async (saleItems, isCash) => {
 };
 
 /**
+ * Busca todas las ventas en la base de datos, opcionalmente incluyendo los productos relacionados, y limpia datos innecesarios.
+ *
+ * @async
+ * @function findSales
+ * @param {boolean} withProducts - Indica si se deben incluir los productos asociados a las ventas.
+ * @returns {Promise<Object[]|GenericError>} Retorna una lista de ventas o un error si ocurre una falla.
+ *
+ * @throws {NotFoundError} Si no se encuentran ventas en la base de datos.
+ * @throws {GenericError} Si ocurre un error durante la búsqueda de ventas en la base de datos.
+ */
+const findSales = async (withProducts) => {
+  const t = await sequelize.transaction();
+  try {
+    const data = await rep.findSales(withProducts, t);
+    if (Array.isArray(data)) {
+      if (data.length === 0)
+        throw new NotFoundError("Lista de productos vacía.");
+      else {
+        if (withProducts) {
+          data.forEach((sale) => {
+            sale.dataValues.Products.forEach((p) => {
+              delete p.dataValues.products_sales;
+            });
+          });
+        }
+
+        await t.commit();
+        return data;
+      }
+    } else throw data;
+  } catch (err) {
+    await t.rollback();
+    return new GenericError("Error encontrando ventas", err.message);
+  }
+};
+
+/**
  * Reduce el stock de un producto y actualiza la base de datos.
  * Si el stock resulta ser negativo, lanza un error indicando que no hay suficiente inventario.
  *
@@ -92,4 +129,5 @@ const stockReduction = async (product, quantity, transaction) => {
 
 module.exports = {
   createSale,
+  findSales,
 };

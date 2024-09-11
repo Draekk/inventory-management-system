@@ -40,6 +40,42 @@ const createSale = async (req, res) => {
   }
 };
 
+/**
+ * Controlador que busca todas las ventas, opcionalmente incluyendo productos asociados, y devuelve las ventas formateadas.
+ *
+ * @async
+ * @function findSales
+ * @param {Object} req - El objeto de solicitud HTTP.
+ * @param {Object} req.body - El cuerpo de la solicitud.
+ * @param {boolean} req.body.withProducts - Indica si se deben incluir los productos asociados a las ventas.
+ * @param {Object} res - El objeto de respuesta HTTP.
+ * @returns {Promise<Object>} Responde con un JSON que contiene un mensaje y una lista de ventas, o un error en caso de fallo.
+ *
+ * @throws {GenericError} Si ocurre un error en la capa controladora al buscar las ventas.
+ */
+const findSales = async (req, res) => {
+  try {
+    const { withProducts } = req.body;
+    const data = await serv.findSales(withProducts);
+
+    if (Array.isArray(data)) {
+      const sales = data.map((sale) => saleDateFormatter(sale));
+      return res.status(200).json(createRes("Ventas encontradas.", sales));
+    } else {
+      throw new Error("Error al buscar las ventas.");
+    }
+  } catch (err) {
+    return res
+      .status(500)
+      .json(
+        createBadRes(
+          new GenericError("Error en la capa Controladora.", err.message)
+        )
+      );
+  }
+};
+
 module.exports = {
   createSale,
+  findSales,
 };
