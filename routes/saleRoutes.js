@@ -2,12 +2,23 @@ const express = require("express");
 const {
   createSaleValidation,
   findSalesWithProductsValidation,
+  idParamValidation,
 } = require("../middlewares/validationMiddleware");
-const { createSale, findSales } = require("../controllers/saleController");
+const {
+  createSale,
+  findSales,
+  findSaleById,
+} = require("../controllers/saleController");
 const router = express.Router();
 
 router.post("/create", createSaleValidation, createSale);
 
 router.get("/find/all", findSalesWithProductsValidation, findSales);
+
+router.get(
+  "/find/id/:id",
+  [idParamValidation, findSalesWithProductsValidation],
+  findSaleById
+);
 
 module.exports = router;

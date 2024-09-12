@@ -78,8 +78,7 @@ const findSales = async (withProducts) => {
   try {
     const data = await rep.findSales(withProducts, t);
     if (Array.isArray(data)) {
-      if (data.length === 0)
-        throw new NotFoundError("Lista de productos vacía.");
+      if (data.length === 0) throw new NotFoundError("Lista de ventas vacía.");
       else {
         if (withProducts) {
           data.forEach((sale) => {
@@ -96,6 +95,39 @@ const findSales = async (withProducts) => {
   } catch (err) {
     await t.rollback();
     return new GenericError("Error encontrando ventas", err.message);
+  }
+};
+
+/**
+ * Busca una venta por su ID, opcionalmente incluyendo los productos asociados, y maneja la transacción.
+ *
+ * @async
+ * @function findSaleById
+ * @param {number} id - El ID de la venta a buscar.
+ * @param {boolean} withProducts - Indica si se deben incluir los productos asociados a la venta.
+ * @returns {Promise<Object|Error>} Devuelve la venta encontrada o lanza un error si no se encuentra.
+ *
+ * @throws {GenericError} Lanza un error si ocurre un fallo al buscar la venta o en la transacción.
+ */
+const findSaleById = async (id, withProducts) => {
+  const t = await sequelize.transaction();
+
+  try {
+    const data = await rep.findSaleById(id, withProducts, t);
+    if (!data) throw new NotFoundError(`El ID de venta ${id} no existe.`);
+    else {
+      if (withProducts) {
+        data.dataValues.Products.forEach((p) => {
+          delete p.dataValues.products_sales;
+        });
+      }
+
+      await t.commit();
+      return data;
+    }
+  } catch (err) {
+    await t.rollback();
+    throw err;
   }
 };
 
@@ -130,4 +162,5 @@ const stockReduction = async (product, quantity, transaction) => {
 module.exports = {
   createSale,
   findSales,
+  findSaleById,
 };

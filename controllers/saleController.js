@@ -75,7 +75,39 @@ const findSales = async (req, res) => {
   }
 };
 
+/**
+ * Controlador para buscar una venta por su ID, opcionalmente incluyendo los productos asociados.
+ *
+ * @async
+ * @function findSaleById
+ * @param {Object} req - Objeto de solicitud de Express.
+ * @param {Object} req.params - Parámetros de la solicitud.
+ * @param {number} req.params.id - El ID de la venta a buscar.
+ * @param {Object} req.body - Cuerpo de la solicitud.
+ * @param {boolean} req.body.withProducts - Indica si se deben incluir los productos asociados.
+ * @param {Object} res - Objeto de respuesta de Express.
+ * @returns {Promise<void>} Responde con los detalles de la venta encontrada o un error.
+ *
+ * @throws {Error} Devuelve un error si ocurre algún problema en la búsqueda de la venta.
+ */
+const findSaleById = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { withProducts } = req.body;
+
+    const data = await serv.findSaleById(id, withProducts);
+    return res
+      .status(200)
+      .json(
+        createRes(`Venta encontrada con el ID: ${id}.`, saleDateFormatter(data))
+      );
+  } catch (err) {
+    return res.status(500).json(createBadRes(err.message, err));
+  }
+};
+
 module.exports = {
   createSale,
   findSales,
+  findSaleById,
 };

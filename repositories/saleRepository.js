@@ -63,7 +63,39 @@ const findSales = async (withProducts = false, transaction = null) => {
   }
 };
 
+/**
+ * Busca una venta por su ID, opcionalmente incluyendo los productos asociados.
+ *
+ * @async
+ * @function findSaleById
+ * @param {number} id - El ID de la venta a buscar.
+ * @param {boolean} [withProducts=false] - Indica si se deben incluir los productos asociados a la venta.
+ * @param {Object} [transaction=null] - La transacción de la base de datos en curso (opcional).
+ * @returns {Promise<Object|null>} Devuelve la venta encontrada o `null` si no existe.
+ *
+ * @throws {Error} Lanza un error si ocurre un fallo al buscar la venta.
+ */
+const findSaleById = async (id, withProducts = false, transaction = null) => {
+  try {
+    let data = null;
+    if (withProducts) {
+      data = await Sale.findByPk(id, {
+        include: [Product],
+        transaction,
+      });
+    } else {
+      data = await Sale.findByPk(id, {
+        transaction,
+      });
+    }
+    return data;
+  } catch (err) {
+    throw err;
+  }
+};
+
 module.exports = {
   createSale,
   findSales,
+  findSaleById,
 };
