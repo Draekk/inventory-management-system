@@ -1,4 +1,3 @@
-const { GenericError, NotFoundError } = require("../errors/errorHandler");
 const serv = require("../services/productService");
 const { createRes, createBadRes } = require("../utils/responseFactory");
 
@@ -61,7 +60,6 @@ const updateProduct = async (req, res) => {
   try {
     const product = req.body;
     const data = await serv.updateProduct(product);
-    console.debug(data);
     if (data)
       return res
         .status(200)

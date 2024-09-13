@@ -1,6 +1,6 @@
 const { isEqual, isBoolean } = require("lodash");
 const { createBadRes } = require("../utils/responseFactory");
-const { ValidationError } = require("../errors/customError");
+const { ValidationError } = require("../errors/errorhandler");
 
 /**
  * Middleware para validar las propiedades de un producto en el cuerpo de la solicitud.

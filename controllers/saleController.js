@@ -1,4 +1,3 @@
-const { NotFoundError, GenericError } = require("../errors/errorHandler");
 const serv = require("../services/saleService");
 const { saleDateFormatter } = require("../utils/dateUtil");
 const { createBadRes, createRes } = require("../utils/responseFactory");

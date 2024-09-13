@@ -1,4 +1,3 @@
-const { GenericError } = require("../errors/errorHandler");
 const { Sale, Product, ProductSale } = require("../models");
 
 /**

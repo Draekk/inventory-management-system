@@ -1,5 +1,4 @@
 const sequelize = require("../config/dbConfig");
-const { NotFoundError, GenericError } = require("../errors/errorHandler");
 const { Product, ProductSale } = require("../models");
 const rep = require("../repositories/saleRepository");
 const { updateProduct } = require("../repositories/productRepository");
