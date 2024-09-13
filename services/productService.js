@@ -1,16 +1,21 @@
 const rep = require("../repositories/productRepository");
 const { Product } = require("../models");
-const { GenericError, NotFoundError } = require("../errors/errorHandler");
+const { NotFoundError, NotModifiedError } = require("../errors/errorhandler");
 
 /**
- * Crea un nuevo modelo Product y lo envía al repositorio.
- * @param {Object} productDetail Objeto con los parametros del producto.
- * @param {string} productDetail.barcode Código de barra del producto.
- * @param {string} productDetail.name Nombre del producto.
- * @param {number} productDetail.stock Cantidad disponible del producto.
- * @param {number} productDetail.costPrice Precio de costo del producto.
- * @param {number} productDetail.salePrice Precio de venta del producto.
- * @returns {Object|null} Un objeto con las propiedades del producto creado, o null si ocurrió un error.
+ * Guarda un nuevo producto utilizando el repositorio.
+ *
+ * @async
+ * @function saveProduct
+ * @param {Object} productDetail - Detalles del producto que se va a guardar.
+ * @param {string} productDetail.barcode - Código de barra único del producto.
+ * @param {string} productDetail.name - Nombre del producto.
+ * @param {number} productDetail.stock - Cantidad de stock disponible.
+ * @param {number} productDetail.costPrice - Precio de costo del producto.
+ * @param {number} productDetail.salePrice - Precio de venta del producto.
+ * @throws {Error} Lanza un error si ocurre un problema al guardar el producto.
+ *
+ * @returns {Promise<Object>} El producto guardado si la operación es exitosa.
  */
 const saveProduct = async (productDetail) => {
   try {
@@ -18,35 +23,39 @@ const saveProduct = async (productDetail) => {
     const data = await rep.saveProduct(product);
     return data;
   } catch (err) {
-    return new GenericError("Error en la capa Servicios.", err.message);
+    throw err;
   }
 };
 
 /**
  * Crea un modelo Product con un ID y lo envía al repositorio.
- * @param {Object} productDetail Objeto con los parametros del producto.
- * @param {number} productDetail.id ID del producto a modificar.
- * @param {string} productDetail.barcode Código de barra del producto.
- * @param {string} productDetail.name Nombre del producto.
- * @param {number} productDetail.stock Cantidad disponible del producto.
- * @param {number} productDetail.costPrice Precio de costo del producto.
- * @param {number} productDetail.salePrice Precio de venta del producto.
- * @returns {Object|null} Un objeto con las propiedades del producto actualizado, o null si ocurrió un error.
+ *
+ * @async
+ * @function updateProduct
+ * @param {Object} productDetail - Detalles del producto a actualizar.
+ * @param {number} productDetail.id - ID único del producto a actualizar.
+ * @param {string} [productDetail.barcode] - Nuevo código de barra del producto.
+ * @param {string} [productDetail.name] - Nuevo nombre del producto.
+ * @param {number} [productDetail.stock] - Nuevo stock disponible del producto.
+ * @param {number} [productDetail.costPrice] - Nuevo precio de costo del producto.
+ * @param {number} [productDetail.salePrice] - Nuevo precio de venta del producto.
+ * @throws {NotFoundError} Lanza un error si no se encuentra el producto con el ID especificado.
+ * @throws {Error} Lanza un error si no se efectúan cambios en el producto.
+ * @returns {Promise<Object>} Devuelve el objeto del producto actualizado si se realiza correctamente la actualización.
  */
 const updateProduct = async (productDetail) => {
   try {
-    const oldProduct = await rep.findProductById(productDetail.id);
-    if (!oldProduct)
+    const product = await rep.findProductById(productDetail.id);
+    if (!product)
       throw new NotFoundError(
         `No existe el producto con el ID: ${productDetail.id}.`
       );
-    const product = Product.build(productDetail);
+    const updatedProduct = Product.build(productDetail);
     const affectedRows = await rep.updateProduct(productDetail);
-    if (affectedRows === 1) return product;
-    throw new Error("No se efectuaron cambios en el producto");
+    if (affectedRows === 1) return updatedProduct;
+    else throw new NotModifiedError("No se efectuaron cambios en el producto");
   } catch (err) {
-    if (err instanceof NotFoundError) return err;
-    return new GenericError("Error en la capa Servicio.", err.message);
+    throw err;
   }
 };
 

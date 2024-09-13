@@ -3,61 +3,74 @@ const serv = require("../services/productService");
 const { createRes, createBadRes } = require("../utils/responseFactory");
 
 /**
- * Guarda un nuevo producto utilizando el servicio y devuelve una respuesta JSON.
+ * Controlador para crear un nuevo producto en la base de datos.
  *
- * @param {Object} req - El objeto de solicitud.
- * @param {Object} req.body - El cuerpo de la solicitud que contiene los datos del producto.
- * @param {Object} res - El objeto de respuesta.
- * @returns {Promise<Object>} - Una respuesta JSON que contiene el producto creado o un mensaje de error.
+ * @async
+ * @function saveProduct
+ * @param {Object} req - Objeto de solicitud de Express.
+ * @param {Object} req.body - Contiene los detalles del producto a crear.
+ * @param {string} req.body.barcode - Código de barras del producto.
+ * @param {string} req.body.name - Nombre del producto.
+ * @param {number} req.body.stock - Stock inicial del producto.
+ * @param {number} req.body.costPrice - Precio de costo del producto.
+ * @param {number} req.body.salePrice - Precio de venta del producto.
+ * @param {Object} res - Objeto de respuesta de Express.
+ * @throws {Error} Lanza un error si no se puede crear el producto.
+ * @returns {Promise<Object>} Devuelve una respuesta JSON con el mensaje de éxito y los datos del producto creado.
  */
 const saveProduct = async (req, res) => {
   try {
-    const product = req.body;
-    const data = await serv.saveProduct(product);
+    const { barcode, name, stock, costPrice, salePrice } = req.body;
+    const data = await serv.saveProduct({
+      barcode,
+      name,
+      stock,
+      costPrice,
+      salePrice,
+    });
     console.log(data);
-    if (data.hasOwnProperty("error"))
-      return res.status(500).json(createBadRes(data));
-    else
+    if (data)
       return res
-        .status(202)
+        .status(201)
         .json(createRes("Producto creado exitósamente", data));
+    else throw new Error("Error al crear el producto.");
   } catch (err) {
-    return res
-      .status(500)
-      .json(
-        createBadRes(
-          new GenericError("Error en la capa Controladora:", err.message)
-        )
-      );
+    if (err.status) return res.status(err.status).json(createBadRes(err));
+    else return res.status(500).json(createBadRes(err));
   }
 };
 
 /**
- * Obtiene una lista de productos del servicio y los devuelve como un JSON dentro de la respuesta.
+ * Controlador para actualizar un producto en la base de datos.
  *
- * @param {Object} req - El objeto de solicitud.
- * @param {Object} res - El objeto de respuesta.
- * @returns {Promise<Object>} - Una respuesta JSON que contiene los productos encontrados o un mensaje de error.
+ * @async
+ * @function updateProduct
+ * @param {Object} req - Objeto de solicitud de Express.
+ * @param {Object} req.body - Contiene los detalles del producto a actualizar.
+ * @param {number} req.body.id - ID único del producto a actualizar.
+ * @param {string} [req.body.barcode] - Nuevo código de barra del producto.
+ * @param {string} [req.body.name] - Nuevo nombre del producto.
+ * @param {number} [req.body.stock] - Nuevo stock disponible del producto.
+ * @param {number} [req.body.costPrice] - Nuevo precio de costo del producto.
+ * @param {number} [req.body.salePrice] - Nuevo precio de venta del producto.
+ * @param {Object} res - Objeto de respuesta de Express.
+ * @throws {Error} Lanza un error si no se puede actualizar el producto o si la actualización falla.
+ * @returns {Promise<Object>} Devuelve una respuesta JSON con el mensaje de éxito y los datos del producto actualizado.
  */
 const updateProduct = async (req, res) => {
   try {
     const product = req.body;
     const data = await serv.updateProduct(product);
-    if (data instanceof NotFoundError)
-      return res.status(404).json(createBadRes(data));
-    else if (data instanceof GenericError)
-      return res.status(500).json(createBadRes(data));
-    return res
-      .status(202)
-      .json(createRes("Producto actualizado correctamente.", data));
+    console.debug(data);
+    if (data)
+      return res
+        .status(200)
+        .json(createRes("Producto actualizado correctamente.", data));
+    else throw new Error("Error al actualizar el producto.");
   } catch (err) {
-    return res
-      .status(500)
-      .json(
-        createBadRes(
-          new GenericError("Error en la capa Controladora", err.message)
-        )
-      );
+    if (err.status) {
+      return res.status(err.status).json(createBadRes(err));
+    } else return res.status(500).json(createBadRes(err.message));
   }
 };
 

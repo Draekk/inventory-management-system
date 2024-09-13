@@ -1,25 +1,24 @@
 const { isEqual, isBoolean } = require("lodash");
-const { MiddlewareError } = require("../errors/errorHandler");
 const { createBadRes } = require("../utils/responseFactory");
+const { ValidationError } = require("../errors/customError");
 
 /**
- * Middleware que valida las propiedades del objeto de producto en el cuerpo de la solicitud.
- * Se asegura de que el objeto tenga las propiedades correctas para crear o actualizar un producto.
+ * Middleware para validar las propiedades de un producto en el cuerpo de la solicitud.
  *
  * @function productValidation
- * @param {Object} req - Objeto de solicitud (Request) de Express.
- * @param {Object} req.body - Cuerpo de la solicitud que contiene las propiedades del producto.
- * @param {number} [req.body.id] - ID del producto (opcional si es una creación).
- * @param {string} req.body.barcode - Código de barras del producto.
- * @param {string} req.body.name - Nombre del producto.
- * @param {number} req.body.stock - Stock disponible del producto.
- * @param {number} req.body.costPrice - Precio de costo del producto.
- * @param {number} req.body.salePrice - Precio de venta del producto.
- * @param {Object} res - Objeto de respuesta (Response) de Express.
- * @param {Function} next - Función para pasar al siguiente middleware.
- * @returns {void}
+ * @param {Object} req - Objeto de solicitud de Express.
+ * @param {Object} req.body - Cuerpo de la solicitud que contiene los datos del producto.
+ * @param {number} [req.body.id] - ID del producto (opcional, numérico).
+ * @param {string} req.body.barcode - Código de barras del producto (string).
+ * @param {string} req.body.name - Nombre del producto (string).
+ * @param {number} req.body.stock - Stock disponible del producto (numérico).
+ * @param {number} req.body.costPrice - Precio de costo del producto (numérico).
+ * @param {number} req.body.salePrice - Precio de venta del producto (numérico).
+ * @param {Object} res - Objeto de respuesta de Express.
+ * @param {Function} next - Función para pasar al siguiente middleware si la validación es exitosa.
+ * @throws {ValidationError} Lanza un error si las propiedades del objeto son incorrectas.
  *
- * @throws {MiddlewareError} Si las propiedades del producto son incorrectas.
+ * @returns {void} Si la validación es correcta, llama a `next()`, en caso contrario devuelve una respuesta con error.
  */
 const productValidation = (req, res, next) => {
   try {
@@ -32,98 +31,88 @@ const productValidation = (req, res, next) => {
       "salePrice",
     ];
     const props = Object.keys(req.body);
-    console.log(props);
 
     if (props[0] !== "id") {
       productProps.shift();
-      console.log(productProps);
-      console.log(isEqual(productProps, props));
     }
     if (isEqual(props, productProps)) {
       return next();
     }
-    throw new Error("Los parámetros del objeto son incorrectos.");
+    throw new ValidationError(
+      "Las propiedades del objeto son incorrectos. La estructura debe ser: 'id' (opcional | numérico), 'barcode' (string), 'name' (string), 'stock' (numérico), 'costPrice' (numérico), 'salePrice' (numérico)."
+    );
   } catch (err) {
-    return res
-      .status(500)
-      .json(
-        createBadRes(new MiddlewareError("Error en el Request.", err.message))
-      );
+    if (err.status) return res.status(err.status).json(createBadRes(err));
+    else return res.status(500).json(createBadRes(err));
   }
 };
 
 /**
- * Middleware que valida si el parámetro `id` en la URL es un número válido.
+ * Middleware para validar que el parámetro `id` de la URL sea un número válido.
  *
  * @function idParamValidation
- * @param {Object} req - Objeto de solicitud (Request) de Express.
- * @param {Object} req.params - Contiene los parámetros de la URL.
- * @param {string} req.params.id - ID del producto en la URL.
- * @param {Object} res - Objeto de respuesta (Response) de Express.
- * @param {Function} next - Función para pasar al siguiente middleware.
- * @returns {void}
+ * @param {Object} req - Objeto de solicitud de Express.
+ * @param {Object} req.params - Parámetros de la URL.
+ * @param {string} req.params.id - ID recibido en la URL, que debe ser un número.
+ * @param {Object} res - Objeto de respuesta de Express.
+ * @param {Function} next - Función que llama al siguiente middleware si la validación es exitosa.
+ * @throws {ValidationError} Lanza un error si el `id` no es un número válido.
  *
- * @throws {MiddlewareError} Si el parámetro `id` no es un número válido.
+ * @returns {void} Si la validación es correcta, llama a `next()`. En caso contrario, devuelve una respuesta con el error.
  */
 const idParamValidation = (req, res, next) => {
   try {
     const id = parseInt(req.params.id);
     if (!isNaN(id)) {
       return next();
-    } else throw new Error("El ID de la URL no es un número válido.");
+    } else throw new ValidationError("El ID de la URL no es un número válido.");
   } catch (err) {
-    return res
-      .status(400)
-      .json(
-        createBadRes(new MiddlewareError("Error en el Request.", err.message))
-      );
+    if (err.status) return res.status(err.status).json(createBadRes(err));
+    else return res.status(500).json(createBadRes(err));
   }
 };
 
 /**
- * Middleware que valida si el parámetro `barcode` en la URL es válido.
+ * Middleware para validar que el parámetro `barcode` de la URL sea válido.
  *
  * @function barcodeParamValidation
- * @param {Object} req - Objeto de solicitud (Request) de Express.
- * @param {Object} req.params - Contiene los parámetros de la URL.
- * @param {string} req.params.barcode - Código de barras del producto en la URL.
- * @param {Object} res - Objeto de respuesta (Response) de Express.
- * @param {Function} next - Función para pasar al siguiente middleware.
- * @returns {void}
+ * @param {Object} req - Objeto de solicitud de Express.
+ * @param {Object} req.params - Parámetros de la URL.
+ * @param {string} req.params.barcode - Código de barras recibido en la URL, que debe ser un string válido.
+ * @param {Object} res - Objeto de respuesta de Express.
+ * @param {Function} next - Función que llama al siguiente middleware si la validación es exitosa.
+ * @throws {ValidationError} Lanza un error si el `barcode` no es válido.
  *
- * @throws {MiddlewareError} Si el parámetro `barcode` no es válido.
+ * @returns {void} Si la validación es correcta, llama a `next()`. En caso contrario, devuelve una respuesta con el error.
  */
 const barcodeParamValidation = (req, res, next) => {
   try {
     const barcode = req.params.barcode;
     if (barcode) {
       return next();
-    } else throw new Error("El Código en la URL no es válido.");
+    } else
+      throw new ValidationError("El Código de barra en la URL no es válido.");
   } catch (err) {
-    return res
-      .status(400)
-      .json(
-        createBadRes(new MiddlewareError("Error en el Request.", err.message))
-      );
+    if (err.status) return res.status(err.status).json(createBadRes(err));
+    else return res.status(500).json(createBadRes(err));
   }
 };
 
 /**
- * Middleware que valida la estructura de la solicitud para crear una venta.
- * Se asegura de que el cuerpo de la solicitud contenga una lista de productos y una propiedad `isCash`.
+ * Middleware para validar el cuerpo de la solicitud al crear una venta.
  *
  * @function createSaleValidation
- * @param {Object} req - Objeto de solicitud (Request) de Express.
+ * @param {Object} req - Objeto de solicitud de Express.
  * @param {Object} req.body - Cuerpo de la solicitud.
- * @param {Object[]} req.body.products - Lista de productos incluidos en la venta.
- * @param {number} req.body.products[].id - ID del producto (numérico).
- * @param {number} req.body.products[].quantity - Cantidad del producto (numérico).
+ * @param {Array<Object>} req.body.products - Lista de productos en la venta.
+ * @param {number} req.body.products[].id - ID del producto, debe ser un número.
+ * @param {number} req.body.products[].quantity - Cantidad del producto, debe ser un número.
  * @param {boolean} req.body.isCash - Indica si la venta es en efectivo.
- * @param {Object} res - Objeto de respuesta (Response) de Express.
- * @param {Function} next - Función para pasar al siguiente middleware.
- * @returns {void}
+ * @param {Object} res - Objeto de respuesta de Express.
+ * @param {Function} next - Función que llama al siguiente middleware si la validación es exitosa.
+ * @throws {ValidationError} Lanza un error si las propiedades de la venta o de los productos no son válidas.
  *
- * @throws {MiddlewareError} Si el cuerpo de la solicitud no tiene la estructura correcta.
+ * @returns {void} Si la validación es correcta, llama a `next()`. En caso contrario, devuelve una respuesta con el error.
  */
 const createSaleValidation = (req, res, next) => {
   try {
@@ -133,38 +122,34 @@ const createSaleValidation = (req, res, next) => {
       products.forEach((p) => {
         const pProps = Object.keys(p);
         if (pProps[0] !== "id" || pProps[1] !== "quantity") {
-          throw new Error(
-            "Error en propiedad del producto, debe contener una propiedad 'id' numérico y una propiedad 'quantity' numérico."
+          throw new ValidationError(
+            "Error en propiedad del producto, debe contener una propiedad 'id' (numérico) y una propiedad 'quantity' (numérico)."
           );
         }
       });
       return next();
     } else
-      throw new Error(
-        "Error en propiedad de venta, debe contener una propiedad 'products' lista de objetos y una propiedad 'isCash' booleana."
+      throw new ValidationError(
+        "Error en propiedad de venta, debe contener una propiedad 'products' (lista de objetos) y una propiedad 'isCash' (booleana)."
       );
   } catch (err) {
-    return res
-      .status(400)
-      .json(
-        createBadRes(new MiddlewareError("Error en el Request.", err.message))
-      );
+    if (err.status) return res.status(err.status).json(createBadRes(err));
+    else return res.status(500).json(createBadRes(err));
   }
 };
 
 /**
- * Middleware que valida si la propiedad 'withProducts' del cuerpo de la solicitud es un booleano.
+ * Middleware para validar la propiedad 'withProducts' en el cuerpo de la solicitud.
  *
  * @function findSalesWithProductsValidation
- * @param {Object} req - El objeto de solicitud HTTP.
- * @param {Object} req.body - El cuerpo de la solicitud.
- * @param {boolean} req.body.withProducts - Indica si se deben incluir los productos asociados a las ventas.
- * @param {Object} res - El objeto de respuesta HTTP.
- * @param {Function} next - La función que llama al siguiente middleware si la validación es exitosa.
+ * @param {Object} req - Objeto de solicitud de Express.
+ * @param {Object} req.body - Cuerpo de la solicitud.
+ * @param {boolean} req.body.withProducts - Indica si se deben incluir los productos en la respuesta, debe ser un booleano.
+ * @param {Object} res - Objeto de respuesta de Express.
+ * @param {Function} next - Función que llama al siguiente middleware si la validación es exitosa.
+ * @throws {ValidationError} Lanza un error si 'withProducts' no es de tipo booleano.
  *
- * @returns {Object|void} Si la validación falla, responde con un error 400. Si es exitosa, llama a `next()`.
- *
- * @throws {MiddlewareError} Si la propiedad 'withProducts' no es de tipo booleano o no existe.
+ * @returns {void} Si la validación es correcta, llama a `next()`. En caso contrario, devuelve una respuesta con el error.
  */
 const findSalesWithProductsValidation = (req, res, next) => {
   try {
@@ -172,13 +157,12 @@ const findSalesWithProductsValidation = (req, res, next) => {
 
     if (isBoolean(withProducts)) return next();
     else
-      throw new Error(
+      throw new ValidationError(
         "La propiedad en el body debe ser 'withProducts' y debe ser de tipo 'boolean'."
       );
   } catch (err) {
-    return res
-      .status(400)
-      .json(createBadRes(new MiddlewareError(err.message, err)));
+    if (err.status) return res.status(err.status).json(createBadRes(err));
+    else return res.status(500).json(createBadRes(err));
   }
 };
 

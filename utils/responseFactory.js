@@ -20,7 +20,6 @@ const createRes = (message, data = null) => {
 const createBadRes = (error) => {
   return {
     success: false,
-    message: error.message,
     error: error,
   };
 };

@@ -1,20 +1,22 @@
 const { Op } = require("sequelize");
 const { Product } = require("../models");
-const {
-  ValidationError,
-  GenericError,
-  NotFoundError,
-} = require("../errors/errorHandler");
+const { UniqueConstraintError } = require("../errors/errorhandler");
 
 /**
- * Guarda un nuevo producto en la base de datos
- * @param { Product } product - Propiedades del producto.
- * @param { string } product.barcode - Código de barra del producto.
- * @param { string } product.name - Nombre del producto.
- * @param { number } product.stock - Cantidad disponible del producto.
- * @param { number } product.costPrice - Precio de costo del producto.
- * @param { number } product.salePrice - Precio de venta del producto.
- * @returns { Promise<Product|null> } El producto creado o null si ocurre un error.
+ * Guarda un nuevo producto en la base de datos.
+ *
+ * @async
+ * @function saveProduct
+ * @param {Object} product - Objeto que contiene los datos del producto.
+ * @param {string} product.barcode - Código de barra único del producto.
+ * @param {string} product.name - Nombre del producto.
+ * @param {number} product.stock - Cantidad de stock disponible.
+ * @param {number} product.costPrice - Precio de costo del producto.
+ * @param {number} product.salePrice - Precio de venta del producto.
+ * @throws {UniqueConstraintError} Lanza un error si el código de barra ya existe en la base de datos.
+ * @throws {Error} Lanza un error si ocurre un problema inesperado durante la creación.
+ *
+ * @returns {Promise<Object>} El producto creado si la operación es exitosa.
  */
 const saveProduct = async ({ barcode, name, stock, costPrice, salePrice }) => {
   try {
@@ -29,25 +31,31 @@ const saveProduct = async ({ barcode, name, stock, costPrice, salePrice }) => {
     if (data) return data;
   } catch (err) {
     if (err.name === "SequelizeUniqueConstraintError") {
-      return new ValidationError(
-        "Error: el barcode debe ser único",
-        err.message
+      throw new UniqueConstraintError(
+        "El producto ya existe. Violación de restrición única."
       );
     }
-    return new GenericError("Error en la capa Repositorio.", err);
+    throw err;
   }
 };
 
 /**
- * Actualiza un producto existente en la base de datos.
- * @param { Product } product - Propiedades del producto.
- * @param { number } product.id - ID del producto.
- * @param { string } product.barcode - Código de barra del producto.
- * @param { string } product.name - Nombre del producto.
- * @param { number } product.stock - Cantidad disponible del producto.
- * @param { number } product.costPrice - Precio de costo del producto.
- * @param { number } product.salePrice - Precio de venta del producto.
- * @returns { Promise<number|null> } Un arreglo con el numero de filas afectadas.
+ * Actualiza los detalles de un producto en la base de datos.
+ *
+ * @async
+ * @function updateProduct
+ * @param {Object} productDetails - Detalles del producto a actualizar.
+ * @param {number} productDetails.id - ID único del producto a actualizar.
+ * @param {string} productDetails.barcode - Nuevo código de barra del producto.
+ * @param {string} productDetails.name - Nuevo nombre del producto.
+ * @param {number} productDetails.stock - Nuevo stock disponible del producto.
+ * @param {number} productDetails.costPrice - Nuevo precio de costo del producto.
+ * @param {number} productDetails.salePrice - Nuevo precio de venta del producto.
+ * @param {Object} [transaction=null] - Transacción Sequelize opcional para la operación.
+ * @throws {UniqueConstraintError} Lanza un error si hay una violación de restricción única.
+ * @throws {Error} Lanza un error si ocurre un problema inesperado durante la actualización.
+ *
+ * @returns {Promise<number>} Número de filas afectadas por la operación de actualización.
  */
 const updateProduct = async (
   { id, barcode, name, stock, costPrice, salePrice },
@@ -71,7 +79,12 @@ const updateProduct = async (
     );
     return data[0];
   } catch (err) {
-    return new GenericError("Error en la capa Repositorio.", err.message);
+    if (err.name === "SequelizeUniqueConstraintError") {
+      throw new UniqueConstraintError(
+        "El producto ya existe. Violación de restrición única."
+      );
+    }
+    throw err;
   }
 };
 
