@@ -35,7 +35,7 @@ const saveProduct = async (req, res) => {
     else throw new Error("Error al crear el producto.");
   } catch (err) {
     if (err.status) return res.status(err.status).json(createBadRes(err));
-    else return res.status(500).json(createBadRes(err));
+    else return res.status(500).json(createBadRes(err.message));
   }
 };
 
@@ -66,9 +66,8 @@ const updateProduct = async (req, res) => {
         .json(createRes("Producto actualizado correctamente.", data));
     else throw new Error("Error al actualizar el producto.");
   } catch (err) {
-    if (err.status) {
-      return res.status(err.status).json(createBadRes(err));
-    } else return res.status(500).json(createBadRes(err.message));
+    if (err.status) return res.status(err.status).json(createBadRes(err));
+    else return res.status(500).json(createBadRes(err.message));
   }
 };
 
@@ -82,150 +81,115 @@ const updateProduct = async (req, res) => {
 const findProducts = async (req, res) => {
   try {
     const data = await serv.findProducts();
-    if (data instanceof NotFoundError)
-      return res.status(404).json(createBadRes(data));
-    else if (data instanceof GenericError)
-      return res.status(500).json(createBadRes(data));
-    return res.status(200).json(createRes("Productos encontrados", data));
-  } catch (err) {
     return res
-      .status(500)
-      .json(
-        createBadRes(
-          new GenericError("Error en la capa Controladora.", err.message)
-        )
-      );
+      .status(200)
+      .json(createRes("Productos encontrados correctamente.", data));
+  } catch (err) {
+    if (err.status) return res.status(err.status).json(createBadRes(err));
+    else return res.status(500).json(createBadRes(err.message));
   }
 };
 
 /**
- * Extrae un valor `id` del request y lo envía al servicio,
- * si el `id` existe en la base de datos, obtendrá un producto y lo
- * enviará como respuesta.
+ * Controlador para buscar un producto por su ID.
  *
- * @param {Object} req - El objeto de solicitud.
- * @param {Object} req.params - Los parámetros de la solicitud.
+ * @async
+ * @function findProductById
+ * @param {Object} req - Objeto de solicitud (Request) de Express.
+ * @param {Object} res - Objeto de respuesta (Response) de Express.
+ * @param {Object} req.params - Los parámetros de la URL.
  * @param {string} req.params.id - El ID del producto a buscar.
- * @param {Object} res - El objeto de respuesta.
- * @returns {Promise<Object>} - Una respuesta JSON que contiene el producto encontrado o un mensaje de error.
+ * @returns {Promise<Object>} Retorna una respuesta JSON con el producto encontrado o un error.
  */
 const findProductById = async (req, res) => {
   try {
     const id = req.params.id;
     const data = await serv.findProductById(id);
-    if (data instanceof NotFoundError)
-      return res.status(404).json(createBadRes(data));
-    else if (data instanceof GenericError)
-      return res.status(500).json(createBadRes(data));
-    return res.status(200).json(createRes("Producto encontrado.", data));
-  } catch (err) {
     return res
-      .status(500)
-      .json(
-        createBadRes(
-          new GenericError("Error en la capa Controladora.", err.message)
-        )
-      );
+      .status(200)
+      .json(createRes(`Se encontró el producto con ID: ${id}`, data));
+  } catch (err) {
+    if (err.status) return res.status(err.status).json(createBadRes(err));
+    else return res.status(500).json(createBadRes(err.message));
   }
 };
 
 /**
- * Busca un producto en la base de datos utilizando su código de barras.
+ * Controlador para buscar un producto por su código de barras.
  *
  * @async
  * @function findProductByBarcode
- * @param {Object} req - Objeto de solicitud (Request) de Express.
- * @param {Object} req.params - Objeto que contiene los parámetros de la solicitud.
- * @param {string} req.params.barcode - Código de barras del producto que se desea buscar.
- * @param {Object} res - Objeto de respuesta (Response) de Express.
- * @returns {Promise<void>} Retorna una respuesta HTTP con los datos del producto encontrado o con un mensaje de error.
- *
- * @throws {GenericError} Si ocurre un error inesperado durante la operación.
+ * @param {Object} req - El objeto de solicitud (request) de Express.
+ * @param {Object} req.params - Los parámetros de la URL.
+ * @param {string} req.params.barcode - El código de barras del producto a buscar.
+ * @param {Object} res - El objeto de respuesta (response) de Express.
+ * @returns {Promise<Object|void>} Retorna una promesa que resuelve con la respuesta enviada al cliente.
+ * @throws {NotFoundError} Lanza un error si no se encuentra un producto con el código de barras dado.
  */
 const findProductByBarcode = async (req, res) => {
   try {
     const barcode = req.params.barcode;
     const data = await serv.findProductByBarcode(barcode);
-    if (data instanceof NotFoundError)
-      return res.status(404).json(createBadRes(data));
-    else if (data instanceof GenericError)
-      return res.status(500).json(createBadRes(data));
-    else
-      return res
-        .status(200)
-        .json(
-          createRes(`Producto encontrado con el Código: ${barcode}.`, data)
-        );
-  } catch (err) {
     return res
-      .status(500)
+      .status(200)
       .json(
-        createBadRes(
-          new GenericError("Error en la capa Controladora.", err.message)
-        )
+        createRes(`Se encontró el producto con el Código: ${barcode}.`, data)
       );
+  } catch (err) {
+    if (err.status) return res.status(err.status).json(createBadRes(err));
+    else return res.status(500).json(createBadRes(err.message));
   }
 };
 
 /**
- * Encuentra productos por su nombre y los devuelve en la respuesta.
+ * Controlador para buscar productos por nombre utilizando una coincidencia parcial.
  *
- * @param {Object} req - El objeto de solicitud.
- * @param {Object} req.params - Los parámetros de la solicitud.
- * @param {string} req.params.name - El nombre del producto a buscar.
- * @param {Object} res - El objeto de respuesta.
- * @returns {Promise<Object>} - Una respuesta JSON que contiene los productos encontrados o un mensaje de error.
+ * @async
+ * @function findProductsByName
+ * @param {Object} req - El objeto de solicitud de Express.
+ * @param {Object} req.params - Los parámetros de la URL.
+ * @param {string} req.params.name - El nombre (o parte del nombre) del producto a buscar.
+ * @param {Object} res - El objeto de respuesta de Express.
+ * @returns {Promise<Object>} - Retorna una respuesta JSON con un mensaje y los productos encontrados.
+ * @throws {Error} - Lanza un error si ocurre un problema durante la búsqueda de productos o al enviar la respuesta.
  */
 const findProductsByName = async (req, res) => {
   try {
     const name = req.params.name;
     const data = await serv.findProductsByName(name);
-    if (data instanceof NotFoundError)
-      return res.status(404).json(createBadRes(data));
-    else if (data instanceof GenericError)
-      return res.status(500).json(createBadRes(data));
     return res
       .status(200)
-      .json(createRes(`Productos encontrados con el nombre: ${name}.`, data));
-  } catch (err) {
-    return res
-      .status(500)
       .json(
-        createBadRes(
-          new GenericError("Error en la capa Controladora.", err.message)
-        )
+        createRes(`Se encontraron productos con el nombre: ${name}.`, data)
       );
+  } catch (err) {
+    if (err.status) return res.status(err.status).json(createBadRes(err));
+    else return res.status(500).json(createBadRes(err.message));
   }
 };
 
 /**
- * Elimina un producto de la base de datos basado en su ID.
+ * Controlador para eliminar un producto por su ID.
  *
- * @param {Object} req - Objeto de solicitud (Request) de Express.
- * @param {Object} req.params - Objeto que contiene los parámetros de la solicitud.
- * @param {string} req.params.id - ID del producto que se desea eliminar.
- * @param {Object} res - Objeto de respuesta (Response) de Express.
- * @returns {Promise<void>} Retorna una respuesta HTTP con el resultado de la operación.
+ * @async
+ * @function deleteProductById
+ * @param {Object} req - El objeto de solicitud HTTP.
+ * @param {Object} req.params - Los parámetros de la solicitud.
+ * @param {string} req.params.id - El ID del producto a eliminar.
+ * @param {Object} res - El objeto de respuesta HTTP.
+ * @returns {Object} - Respuesta HTTP con el estado de la operación de eliminación.
+ * @throws {Object} - Retorna un objeto JSON con un mensaje de error si ocurre un problema.
  */
 const deleteProductById = async (req, res) => {
   try {
     const id = req.params.id;
     const data = await serv.deleteProductById(id);
-    if (data instanceof NotFoundError)
-      return res.status(404).json(createBadRes(data));
-    else if (data instanceof GenericError)
-      return res.status(500).json(createBadRes(data));
     return res
       .status(200)
-      .json(createRes(`Eliminado el producto con el ID: ${id}.`));
+      .json(createRes(`Se eliminó el producto con ID: ${id}.`));
   } catch (err) {
-    return res
-      .status(500)
-      .json(
-        createBadRes(
-          new GenericError("Error en la capa Controladora.", err.message)
-        )
-      );
+    if (err.status) return res.status(err.status).json(createBadRes(err));
+    else return res.status(500).json(createBadRes(err.message));
   }
 };
 
@@ -240,29 +204,18 @@ const deleteProductById = async (req, res) => {
  * @param {Object} res - Objeto de respuesta (Response) de Express.
  * @returns {Promise<void>} Retorna una respuesta HTTP con el resultado de la operación.
  *
- * @throws {GenericError} Si ocurre un error en la capa controladora o de servicio.
  * @throws {NotFoundError} Si no se encuentra un producto con el código de barras proporcionado.
  */
 const deleteProductByBarcode = async (req, res) => {
   try {
     const barcode = req.params.barcode;
     const data = await serv.deleteProductByBarcode(barcode);
-    if (data instanceof NotFoundError)
-      return res.status(404).json(createBadRes(data));
-    else if (data instanceof GenericError)
-      return res.status(500).json(createBadRes(data));
-    else
-      return res
-        .status(200)
-        .json(createRes(`Eliminado el producto con el Código: ${barcode}.`));
-  } catch (err) {
     return res
-      .status(500)
-      .json(
-        createBadRes(
-          new GenericError("Error en la capa Controladora.", err.message)
-        )
-      );
+      .status(200)
+      .json(createRes(`Se eliminó el producto con el Código: ${barcode}.`));
+  } catch (err) {
+    if (err.status) return res.status(err.status).json(createBadRes(err));
+    else return res.status(500).json(createBadRes(err.message));
   }
 };
 

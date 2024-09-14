@@ -60,83 +60,107 @@ const updateProduct = async (productDetail) => {
 };
 
 /**
- * Obtiene una lista del repositorio con todos los productos de la base de datos.
- * @returns {Product[]|null} Una lista de productos o null si ocurre un error.
+ * Obtiene la lista de productos desde el repositorio. Lanza un error si la lista está vacía.
+ *
+ * @async
+ * @function findProducts
+ * @throws {NotFoundError} Lanza un error si no se encuentran productos.
+ * @throws {Error} Lanza un error genérico si ocurre un problema al consultar los productos.
+ * @returns {Promise<Array<Object>>} Retorna una promesa que resuelve con un array de productos si existen.
  */
 const findProducts = async () => {
   try {
     const products = await rep.findProducts();
-    if (products) return products;
-    throw new NotFoundError("Productos no encontrados");
+    if (products.length > 0) return products;
+    else throw new NotFoundError("Lista de productos inexistente.");
   } catch (err) {
-    if (err instanceof NotFoundError) return err;
-    return new GenericError("Error en la capa Servicio.", err.message);
+    throw err;
   }
 };
 
 /**
- * Obtiene un producto cuyo ID sea igual al ID enviado como argumento al repositorio.
- * @param {number} id ID del producto a buscar.
- * @returns {Product|null} El producto encontrado o null si ocurre un error.
+ * Busca un producto por su ID en el repositorio.
+ *
+ * @async
+ * @function findProductById
+ * @param {number} id - El ID del producto a buscar.
+ * @throws {NotFoundError} Lanza un error si no se encuentra el producto con el ID especificado.
+ * @throws {Error} Lanza un error genérico si ocurre un problema al consultar el producto.
+ * @returns {Promise<Object>} Retorna una promesa que resuelve con el objeto del producto si se encuentra.
  */
 const findProductById = async (id) => {
   try {
     const product = await rep.findProductById(id);
-    if (product) return product.toJSON();
-    throw new NotFoundError(`No existe el producto con el ID: ${id}.`);
+    if (product) return product;
+    else throw new NotFoundError(`No existe el producto con el ID: ${id}.`);
   } catch (err) {
-    if (err instanceof NotFoundError) return err;
-    return new GenericError("Error en la capa Servicio.", err.message);
+    throw err;
   }
 };
 
 /**
- * Obtiene un producto que coincida con el `barcode` a buscar.
- * @param {string} barcode Código de barra del producto a buscar.
- * @returns {Product|null} El producto encontrado o error si no existe.
+ * Busca un producto por su código de barras.
+ *
+ * @async
+ * @function findProductByBarcode
+ * @param {string} barcode - El código de barras del producto a buscar.
+ * @returns {Promise<Object>} Retorna una promesa que resuelve con el producto encontrado.
+ * @throws {NotFoundError} Lanza un error si no se encuentra ningún producto con el código de barras dado.
+ * @throws {Error} Lanza un error si ocurre algún problema durante la búsqueda.
  */
 const findProductByBarcode = async (barcode) => {
   try {
     const products = await rep.findProductByBarcode(barcode);
-    if (products.length === 1) return products[0].toJSON();
-    throw new NotFoundError(`No existe el producto con el código: ${barcode}.`);
+    if (products.length === 1) return products[0];
+    else
+      throw new NotFoundError(
+        `No existe el producto con el código: ${barcode}.`
+      );
   } catch (err) {
-    if (err instanceof NotFoundError) return err;
-    return new GenericError("Error en la capa Servicio.", err.message);
+    throw err;
   }
 };
 
 /**
- * Obtiene una lista con los productos con nombre similar al nombre otorgado como argumento desde el repositorio.
- * @param {string} name Nombre de los productos a buscar.
- * @returns {Product[]|null} Una lista de productos encontrados o null si ocurre un error.
+ * Busca productos por nombre utilizando una coincidencia parcial.
+ *
+ * @async
+ * @function findProductsByName
+ * @param {string} name - El nombre (o parte del nombre) del producto a buscar.
+ * @returns {Promise<Array<Object>>} - Retorna una promesa que resuelve con un array de productos que coinciden con el nombre dado.
+ * @throws {NotFoundError} - Lanza un error si no se encuentran productos con el nombre dado.
+ * @throws {Error} - Lanza un error si ocurre un problema durante la consulta a la base de datos.
  */
+
 const findProductsByName = async (name) => {
   try {
     const products = await rep.findProductsByName(name);
     if (products.length > 0) return products;
-    throw new NotFoundError(`No existen productos con el nombre: ${name}.`);
+    else
+      throw new NotFoundError(`No existen productos con el nombre: ${name}.`);
   } catch (err) {
-    if (err instanceof NotFoundError) return err;
-    return new GenericError("Error en la capa Servicio.", err.message);
+    throw err;
   }
 };
 
 /**
- * Elimina un producto con el ID igual al ID que se le otorga como argumento.
- * @param {number} id ID del producto a eliminar.
- * @returns {number} El numero de filas afectadas o null si ocurre un error.
+ * Elimina un producto de la base de datos por su ID.
+ *
+ * @async
+ * @function deleteProductById
+ * @param {number} id - El ID del producto que se desea eliminar.
+ * @returns {Promise<number>} - Retorna el número de filas afectadas por la eliminación.
+ * @throws {NotFoundError} - Lanza un error si no se encuentra un producto con el ID especificado.
+ * @throws {Error} - Lanza un error si ocurre un problema durante la eliminación del producto.
  */
 const deleteProductById = async (id) => {
   try {
     const affectedRows = await rep.deleteProductById(id);
-    if (affectedRows instanceof GenericError) throw affectedRows;
     if (affectedRows === 0)
       throw new NotFoundError(`No existe el producto con el ID: ${id}.`);
     return affectedRows;
   } catch (err) {
-    if (err instanceof GenericError || err instanceof NotFoundError) return err;
-    return new GenericError("Error en la capa Servicio.", err.message);
+    throw err;
   }
 };
 
@@ -148,21 +172,18 @@ const deleteProductById = async (id) => {
  * @param {string} barcode - Código de barras del producto que se desea eliminar.
  * @returns {Promise<number|GenericError|NotFoundError>} Retorna el número de productos eliminados si la operación es exitosa, o un error si ocurre un fallo.
  *
- * @throws {GenericError} Si ocurre un error en la capa de servicio o en la capa de repositorio.
  * @throws {NotFoundError} Si el producto con el código de barras proporcionado no existe.
  */
 const deleteProductByBarcode = async (barcode) => {
   try {
     const productsDeleted = await rep.deleteProductByBarcode(barcode);
-    if (productsDeleted instanceof GenericError) throw productsDeleted;
-    else if (productsDeleted === 0)
+    if (productsDeleted === 0)
       throw new NotFoundError(
         `No existe el producto con el Código: ${barcode}.`
       );
     else return productsDeleted;
   } catch (err) {
-    if (err instanceof GenericError || err instanceof NotFoundError) return err;
-    return new GenericError("Error en la capa Servicio.", err.message);
+    throw err;
   }
 };
 

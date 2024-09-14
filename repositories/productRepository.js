@@ -89,36 +89,48 @@ const updateProduct = async (
 };
 
 /**
- * Obtiene una lista de todos los productos de la base de datos.
- * @returns {Promise<Product[]|null>} Una promesa con una lista de productos o null si ocurre un error.
+ * Obtiene la lista completa de productos de la base de datos.
+ *
+ * @async
+ * @function findProducts
+ * @throws {Error} Lanza un error si no se pueden recuperar los productos.
+ * @returns {Promise<Array<Object>>} Retorna una promesa que resuelve con un array de objetos que representan los productos.
  */
 const findProducts = async () => {
   try {
     const data = await Product.findAll();
     return data;
   } catch (err) {
-    return new GenericError("Error en la capa Repositorio.", err.message);
+    throw err;
   }
 };
 
 /**
  * Obtiene un producto cuyo ID sea igual al ID enviado como argumento.
- * @param {number} id ID del producto a buscar.
- * @returns {Promise<Product|null>} El producto encontrado o null si ocurre un error.
+ *
+ * @async
+ * @function findProductById
+ * @param {number} id - El ID del producto a buscar.
+ * @returns {Promise<Object|null>} Retorna una promesa que resuelve con el producto encontrado o `null` si no se encuentra.
+ * @throws {Error} Lanza un error si ocurre algún problema durante la búsqueda del producto.
  */
 const findProductById = async (id) => {
   try {
     const data = await Product.findByPk(id);
     return data;
   } catch (err) {
-    return new GenericError("Error en la capa Repositorio", err.message);
+    throw err;
   }
 };
 
 /**
- * Obtiene un producto de la base de datos que coincidad con el `barcode`
- * @param {string} barcode Código de barra del producto a buscar
- * @returns {Promise<Product[]|null>} El producto encontrado o un error si ocurre.
+ * Busca productos por su código de barras.
+ *
+ * @async
+ * @function findProductByBarcode
+ * @param {string} barcode - El código de barras del producto a buscar.
+ * @returns {Promise<Array<Object>>} Retorna una promesa que resuelve con una lista de productos que coinciden con el código de barras.
+ * @throws {Error} Lanza un error si ocurre algún problema durante la búsqueda.
  */
 const findProductByBarcode = async (barcode) => {
   try {
@@ -129,14 +141,18 @@ const findProductByBarcode = async (barcode) => {
     });
     return data;
   } catch (err) {
-    return new GenericError("Error en la capa Repositorio.", err.message);
+    throw err;
   }
 };
 
 /**
- * Obtiene una lista con los productos con nombre similar al nombre otorgado como argumento.
- * @param {string} name Nombre de los productos a buscar.
- * @returns {Promise<Product[]|null>} Una lista de productos encontrados o null si ocurre un error.
+ * Busca productos por nombre utilizando una coincidencia parcial.
+ *
+ * @async
+ * @function findProductsByName
+ * @param {string} name - El nombre (o parte del nombre) del producto a buscar.
+ * @returns {Promise<Array<Object>>} - Retorna una promesa que resuelve con un array de productos que coinciden con el nombre dado.
+ * @throws {Error} - Lanza un error si ocurre un problema durante la consulta a la base de datos.
  */
 const findProductsByName = async (name) => {
   try {
@@ -149,14 +165,18 @@ const findProductsByName = async (name) => {
     });
     return data;
   } catch (err) {
-    return new GenericError("Error en la capa Repositorio.", err.message);
+    throw err;
   }
 };
 
 /**
- * Elimina un producto con el ID igual al ID que se le otorga como argumento.
- * @param {number} id ID del producto a eliminar.
- * @returns {number} El numero de filas afectadas o null si ocurre un error.
+ * Elimina un producto de la base de datos por su ID.
+ *
+ * @async
+ * @function deleteProductById
+ * @param {number} id - El ID del producto que se desea eliminar.
+ * @returns {Promise<number>} - Retorna el número de filas afectadas por la eliminación.
+ * @throws {Error} - Lanza un error si ocurre un problema durante la eliminación del producto.
  */
 const deleteProductById = async (id) => {
   try {
@@ -167,7 +187,7 @@ const deleteProductById = async (id) => {
     });
     return data;
   } catch (err) {
-    return new GenericError("Error en la capa Repositorio.", err.message);
+    throw err;
   }
 };
 
@@ -179,7 +199,7 @@ const deleteProductById = async (id) => {
  * @param {string} barcode - Código de barras del producto que se desea eliminar.
  * @returns {Promise<number|GenericError>} Retorna el número de productos eliminados si la operación es exitosa, o un error si ocurre un fallo.
  *
- * @throws {GenericError} Si ocurre un error durante la eliminación del producto en la capa del repositorio.
+ * @throws {Error} Si ocurre un error durante la eliminación del producto en la capa del repositorio.
  */
 const deleteProductByBarcode = async (barcode) => {
   try {
@@ -190,7 +210,7 @@ const deleteProductByBarcode = async (barcode) => {
     });
     return data;
   } catch (err) {
-    return new GenericError("Error en la capa Repositorio.", err.message);
+    throw err;
   }
 };
 
