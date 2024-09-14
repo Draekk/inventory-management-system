@@ -2,6 +2,11 @@ const sequelize = require("../config/dbConfig");
 const { Product, ProductSale } = require("../models");
 const rep = require("../repositories/saleRepository");
 const { updateProduct } = require("../repositories/productRepository");
+const {
+  NotFoundError,
+  NumberOutOfRangeError,
+  NotModifiedError,
+} = require("../errors/errorhandler");
 
 /**
  * Crea una venta en la base de datos, actualiza el stock de los productos vendidos y maneja la transacción.
@@ -13,10 +18,10 @@ const { updateProduct } = require("../repositories/productRepository");
  * @param {number} saleItems[].id - ID del producto.
  * @param {number} saleItems[].quantity - Cantidad del producto vendido.
  * @param {boolean} isCash - Indica si la venta es en efectivo (true) o con otro método (false).
- * @returns {Promise<Object|GenericError>} Retorna el objeto de la venta creada o un error en caso de falla.
+ * @returns {Promise<Object>} Retorna el objeto de la venta creada o un error en caso de falla.
  *
  * @throws {NotFoundError} Si no se encuentra alguno de los productos en la base de datos.
- * @throws {GenericError} Si ocurre un error al crear la venta o reducir el stock.
+ * @throws {Error} Si ocurre un error al crear la venta o reducir el stock.
  */
 const createSale = async (saleItems, isCash) => {
   const t = await sequelize.transaction();
@@ -57,7 +62,7 @@ const createSale = async (saleItems, isCash) => {
     return sale;
   } catch (err) {
     await t.rollback();
-    return new GenericError("Error creando la venta.", err.message);
+    throw err;
   }
 };
 
@@ -67,46 +72,44 @@ const createSale = async (saleItems, isCash) => {
  * @async
  * @function findSales
  * @param {boolean} withProducts - Indica si se deben incluir los productos asociados a las ventas.
- * @returns {Promise<Object[]|GenericError>} Retorna una lista de ventas o un error si ocurre una falla.
+ * @returns {Promise<Object[]>} Retorna una lista de ventas o un error si ocurre una falla.
  *
  * @throws {NotFoundError} Si no se encuentran ventas en la base de datos.
- * @throws {GenericError} Si ocurre un error durante la búsqueda de ventas en la base de datos.
+ * @throws {Error} Si ocurre un error durante la búsqueda de ventas en la base de datos.
  */
 const findSales = async (withProducts) => {
   const t = await sequelize.transaction();
   try {
     const data = await rep.findSales(withProducts, t);
-    if (Array.isArray(data)) {
-      if (data.length === 0) throw new NotFoundError("Lista de ventas vacía.");
-      else {
-        if (withProducts) {
-          data.forEach((sale) => {
-            sale.dataValues.Products.forEach((p) => {
-              delete p.dataValues.products_sales;
-            });
+    if (data.length === 0) throw new NotFoundError("Lista de ventas vacía.");
+    else {
+      if (withProducts) {
+        data.forEach((sale) => {
+          sale.dataValues.Products.forEach((p) => {
+            delete p.dataValues.products_sales;
           });
-        }
-
-        await t.commit();
-        return data;
+        });
       }
-    } else throw data;
+
+      await t.commit();
+      return data;
+    }
   } catch (err) {
     await t.rollback();
-    return new GenericError("Error encontrando ventas", err.message);
+    throw err;
   }
 };
 
 /**
- * Busca una venta por su ID, opcionalmente incluyendo los productos asociados, y maneja la transacción.
+ * Busca una venta por su ID, con opción de incluir productos asociados, y maneja la transacción de la base de datos.
  *
  * @async
  * @function findSaleById
- * @param {number} id - El ID de la venta a buscar.
+ * @param {number} id - El ID de la venta que se desea buscar.
  * @param {boolean} withProducts - Indica si se deben incluir los productos asociados a la venta.
- * @returns {Promise<Object|Error>} Devuelve la venta encontrada o lanza un error si no se encuentra.
- *
- * @throws {GenericError} Lanza un error si ocurre un fallo al buscar la venta o en la transacción.
+ * @returns {Promise<Object>} - Una promesa que se resuelve con la venta encontrada, incluyendo los productos si se solicitó.
+ * @throws {NotFoundError} - Lanza un error si la venta con el ID proporcionado no se encuentra.
+ * @throws {Error} - Lanza un error si ocurre un problema durante la búsqueda o al manejar la transacción.
  */
 const findSaleById = async (id, withProducts) => {
   const t = await sequelize.transaction();
@@ -131,27 +134,30 @@ const findSaleById = async (id, withProducts) => {
 };
 
 /**
- * Reduce el stock de un producto y actualiza la base de datos.
- * Si el stock resulta ser negativo, lanza un error indicando que no hay suficiente inventario.
+ * Reduce el stock de un producto y actualiza el registro en la base de datos.
  *
  * @async
  * @function stockReduction
- * @param {Object} product - Objeto que representa el producto cuyo stock se va a reducir.
- * @param {number} product.stock - Stock actual del producto.
- * @param {number} quantity - Cantidad que se va a reducir del stock.
- * @param {Object} transaction - Objeto de transacción de Sequelize para asegurar la atomicidad de la operación.
- * @returns {Promise<void>}
- *
- * @throws {Error} Si el stock es insuficiente o si hay un error al actualizar el producto.
+ * @param {Object} product - El objeto del producto cuyo stock se va a reducir.
+ * @param {number} quantity - La cantidad a reducir del stock del producto.
+ * @param {Object} transaction - La transacción de Sequelize para asegurar la atomicidad de la operación.
+ * @returns {Promise<void>} - Una promesa que se resuelve cuando la reducción del stock se completa con éxito.
+ * @throws {NumberOutOfRangeError} - Si el stock del producto queda por debajo de 0.
+ * @throws {NotModifiedError} - Si no se logró actualizar el stock del producto en la base de datos.
  */
 const stockReduction = async (product, quantity, transaction) => {
   try {
     product.stock -= quantity;
-    if (product.stock < 0) throw new Error("Stock insuficiente.");
+    if (product.stock < 0)
+      throw new NumberOutOfRangeError(
+        "No se pudo crear la venta. Stock insuficiente."
+      );
     else {
       const affectedRows = await updateProduct(product, transaction);
       if (affectedRows < 1)
-        throw new Error("Error al actualizar el stock del producto.");
+        throw new NotModifiedError(
+          "Error al actualizar el stock del producto."
+        );
     }
   } catch (err) {
     throw err;

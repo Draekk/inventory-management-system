@@ -34,9 +34,19 @@ class NotModifiedError extends Error {
   }
 }
 
+class NumberOutOfRangeError extends Error {
+  constructor(message) {
+    super(message);
+    this.name = "NumberOutOfRangeError";
+    this.status = 400;
+    this.cause = message;
+  }
+}
+
 module.exports = {
   ValidationError,
   NotFoundError,
   UniqueConstraintError,
   NotModifiedError,
+  NumberOutOfRangeError,
 };

@@ -20,74 +20,48 @@ const createSale = async (req, res) => {
   try {
     const { products, isCash } = req.body;
     const data = await serv.createSale(products, isCash);
-    if (data instanceof NotFoundError)
-      return res.status(404).json(createBadRes(data));
-    else if (data instanceof GenericError)
-      return res.status(500).json(createBadRes(data));
-    else {
-      const sale = saleDateFormatter(data);
-      return res.status(200).json(createRes("Venta creada con éxito.", sale));
-    }
-  } catch (err) {
     return res
-      .status(500)
-      .status(
-        createBadRes(
-          new GenericError("Error en la capa Controladora.", err.message)
-        )
+      .status(201)
+      .json(
+        createRes("Se ha creado la venta con éxito.", saleDateFormatter(data))
       );
+  } catch (err) {
+    if (err.status) return res.status(err.status).json(createBadRes(err));
+    else return res.status(500).json(createBadRes(err.message));
   }
 };
 
 /**
- * Controlador que busca todas las ventas, opcionalmente incluyendo productos asociados, y devuelve las ventas formateadas.
+ * Obtiene una lista de ventas desde el servicio y responde con la lista formateada.
  *
  * @async
  * @function findSales
- * @param {Object} req - El objeto de solicitud HTTP.
- * @param {Object} req.body - El cuerpo de la solicitud.
- * @param {boolean} req.body.withProducts - Indica si se deben incluir los productos asociados a las ventas.
- * @param {Object} res - El objeto de respuesta HTTP.
- * @returns {Promise<Object>} Responde con un JSON que contiene un mensaje y una lista de ventas, o un error en caso de fallo.
- *
- * @throws {GenericError} Si ocurre un error en la capa controladora al buscar las ventas.
+ * @param {Object} req - El objeto de la solicitud HTTP.
+ * @param {Object} res - El objeto de la respuesta HTTP.
+ * @returns {Promise<void>} - Una promesa que se resuelve cuando se envía la respuesta al cliente.
+ * @throws {Error} - Lanza un error si ocurre un problema al obtener las ventas o al formatear la respuesta.
  */
 const findSales = async (req, res) => {
   try {
     const { withProducts } = req.body;
     const data = await serv.findSales(withProducts);
-
-    if (Array.isArray(data)) {
-      const sales = data.map((sale) => saleDateFormatter(sale));
-      return res.status(200).json(createRes("Ventas encontradas.", sales));
-    } else {
-      throw new Error("Error al buscar las ventas.");
-    }
+    const sales = data.map((sale) => saleDateFormatter(sale));
+    return res.status(200).json(createRes("Ventas encontradas.", sales));
   } catch (err) {
-    return res
-      .status(500)
-      .json(
-        createBadRes(
-          new GenericError("Error en la capa Controladora.", err.message)
-        )
-      );
+    if (err.status) return res.status(err.status).json(createBadRes(err));
+    else return res.status(500).json(createBadRes(err.message));
   }
 };
 
 /**
- * Controlador para buscar una venta por su ID, opcionalmente incluyendo los productos asociados.
+ * Controlador para encontrar una venta por su ID y responder con los datos de la venta.
  *
  * @async
  * @function findSaleById
- * @param {Object} req - Objeto de solicitud de Express.
- * @param {Object} req.params - Parámetros de la solicitud.
- * @param {number} req.params.id - El ID de la venta a buscar.
- * @param {Object} req.body - Cuerpo de la solicitud.
- * @param {boolean} req.body.withProducts - Indica si se deben incluir los productos asociados.
- * @param {Object} res - Objeto de respuesta de Express.
- * @returns {Promise<void>} Responde con los detalles de la venta encontrada o un error.
- *
- * @throws {Error} Devuelve un error si ocurre algún problema en la búsqueda de la venta.
+ * @param {Object} req - El objeto de solicitud de Express.
+ * @param {Object} res - El objeto de respuesta de Express.
+ * @returns {Promise<void>} - No devuelve un valor, pero envía una respuesta HTTP.
+ * @throws {Error} - Lanza un error si ocurre un problema al encontrar la venta o al procesar la respuesta.
  */
 const findSaleById = async (req, res) => {
   try {
@@ -101,7 +75,8 @@ const findSaleById = async (req, res) => {
         createRes(`Venta encontrada con el ID: ${id}.`, saleDateFormatter(data))
       );
   } catch (err) {
-    return res.status(500).json(createBadRes(err.message, err));
+    if (err.status) return res.status(err.status).json(createBadRes(err));
+    else return res.status(500).json(createBadRes(err.message));
   }
 };
 
