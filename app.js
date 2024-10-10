@@ -1,9 +1,21 @@
 require("dotenv");
 const express = require("express");
+const cors = require("cors");
 const { env } = require("process");
 
 const productRouter = require("./routes/productRoutes");
 const saleRouter = require("./routes/saleRoutes");
+
+const corsOptions = {
+  origin: function (origin, callback) {
+    if (origin === "http://localhost:5173") {
+      console.log(origin);
+      callback(null, true);
+    } else {
+      callback(new Error("Conexión denegada..."));
+    }
+  },
+};
 
 const app = express();
 const PORT = env.PORT || 3000;
@@ -12,12 +24,8 @@ app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
 app.use("/api/product", productRouter);
 app.use("/api/sale", saleRouter);
-app.use(express.static("public"));
+app.use(cors(corsOptions));
 
 app.listen(PORT, () =>
   console.log(`Servidor ejecutandose en el puerto: ${PORT}...`)
 );
-
-app.get("/", (req, res) => {
-  return res.redirect("/index");
-});

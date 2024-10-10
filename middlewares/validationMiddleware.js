@@ -31,16 +31,22 @@ const productValidation = (req, res, next) => {
       "salePrice",
     ];
     const props = Object.keys(req.body);
+    const { barcode, name } = req.body;
 
     if (props[0] !== "id") {
       productProps.shift();
     }
-    if (isEqual(props, productProps)) {
+    if (isEqual(props, productProps) && barcode !== "" && name !== "") {
       return next();
+    } else if (barcode === "" || name === "") {
+      throw new ValidationError(
+        "Las propiedades 'barcode' y 'name' no pueden estar vacías."
+      );
+    } else {
+      throw new ValidationError(
+        "Las propiedades del objeto son incorrectos. La estructura debe ser: 'id' (opcional | numérico), 'barcode' (string), 'name' (string), 'stock' (numérico), 'costPrice' (numérico), 'salePrice' (numérico)."
+      );
     }
-    throw new ValidationError(
-      "Las propiedades del objeto son incorrectos. La estructura debe ser: 'id' (opcional | numérico), 'barcode' (string), 'name' (string), 'stock' (numérico), 'costPrice' (numérico), 'salePrice' (numérico)."
-    );
   } catch (err) {
     if (err.status) return res.status(err.status).json(createBadRes(err));
     else return res.status(500).json(createBadRes(err));
