@@ -125,6 +125,8 @@ const createSaleValidation = (req, res, next) => {
     const props = Object.keys(req.body);
     if (props[0] === "products" && props[1] === "isCash") {
       const { products } = req.body;
+      if (products.length === 0)
+        throw new ValidationError("La lista de ventas no puede estar vacía.");
       products.forEach((p) => {
         const pProps = Object.keys(p);
         if (pProps[0] !== "id" || pProps[1] !== "quantity") {
