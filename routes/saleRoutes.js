@@ -13,7 +13,11 @@ const router = express.Router();
 
 router.post("/create", createSaleValidation, createSale);
 
-router.get("/find/all", findSalesWithProductsValidation, findSales);
+router.get(
+  "/find/all/:withProducts",
+  findSalesWithProductsValidation,
+  findSales
+);
 
 router.get(
   "/find/id/:id",

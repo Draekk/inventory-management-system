@@ -1,4 +1,4 @@
-const { isEqual, isBoolean } = require("lodash");
+const { isEqual, isBoolean, isNumber } = require("lodash");
 const { createBadRes } = require("../utils/responseFactory");
 const { ValidationError } = require("../errors/errorhandler");
 
@@ -161,13 +161,11 @@ const createSaleValidation = (req, res, next) => {
  */
 const findSalesWithProductsValidation = (req, res, next) => {
   try {
-    const { withProducts } = req.body;
+    const { withProducts } = req.params;
 
-    if (isBoolean(withProducts)) return next();
+    if (withProducts === "1" || withProducts === "0") return next();
     else
-      throw new ValidationError(
-        "La propiedad en el body debe ser 'withProducts' y debe ser de tipo 'boolean'."
-      );
+      throw new ValidationError("El parametro debe ser un numero entre 0 y 1");
   } catch (err) {
     if (err.status) return res.status(err.status).json(createBadRes(err));
     else return res.status(500).json(createBadRes(err));

@@ -43,8 +43,8 @@ const createSale = async (req, res) => {
  */
 const findSales = async (req, res) => {
   try {
-    const { withProducts } = req.body;
-    const data = await serv.findSales(withProducts);
+    const { withProducts } = req.params;
+    const data = await serv.findSales(+withProducts);
     const sales = data.map((sale) => saleDateFormatter(sale));
     return res.status(200).json(createRes("Ventas encontradas.", sales));
   } catch (err) {

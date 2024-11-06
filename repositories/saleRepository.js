@@ -43,10 +43,10 @@ const createSale = async ({ quantity, total, isCash }, transaction = null) => {
  *
  * @throws {Error} Si ocurre un error al consultar las ventas en la base de datos.
  */
-const findSales = async (withProducts = false, transaction = null) => {
+const findSales = async (withProducts = 0, transaction = null) => {
   try {
     let data = null;
-    if (withProducts) {
+    if (withProducts === 1) {
       data = await Sale.findAll({
         include: [Product],
         transaction,
