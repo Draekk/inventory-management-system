@@ -4,6 +4,7 @@
   "description": "Sistema de control de inventarios, proyecto de Práctica Laboral para el IPP",
   "main": "app.js",
   "scripts": {
+    "start": "node app.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "repository": {
