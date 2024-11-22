@@ -18,13 +18,13 @@ const corsOptions = {
 };
 
 const app = express();
+app.use(cors());
 const PORT = env.PORT || 3000;
 
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
 app.use("/api/product", productRouter);
 app.use("/api/sale", saleRouter);
-app.use(cors(corsOptions));
 
 app.listen(PORT, () =>
   console.log(`Servidor ejecutandose en el puerto: ${PORT}...`)
