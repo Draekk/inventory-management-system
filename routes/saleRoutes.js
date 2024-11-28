@@ -8,6 +8,7 @@ const {
   createSale,
   findSales,
   findSaleById,
+  deleteSaleById,
 } = require("../controllers/saleController");
 const router = express.Router();
 
@@ -24,5 +25,7 @@ router.get(
   [idParamValidation, findSalesWithProductsValidation],
   findSaleById
 );
+
+router.delete("/delete/id/:id", idParamValidation, deleteSaleById);
 
 module.exports = router;

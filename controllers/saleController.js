@@ -80,8 +80,32 @@ const findSaleById = async (req, res) => {
   }
 };
 
+/**
+ * Controlador para eliminar una venta por su ID.
+ *
+ * @async
+ * @function deleteSaleById
+ * @param {Object} req - El objeto de solicitud de Express.
+ * @param {Object} res - El objeto de respuesta de Express.
+ * @returns {Promise<void>} - No devuelve un valor, pero envía una respuesta HTTP.
+ * @throws {Error} - Lanza un error si ocurre un problema al eliminar la venta o al procesar la respuesta.
+ */
+const deleteSaleById = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const data = await serv.deleteSaleById(id);
+    return res
+      .status(200)
+      .json(createRes(`Venta con ID ${id} eliminada.`, data));
+  } catch (err) {
+    if (err.status) return res.status(err.status).json(createBadRes(err));
+    else return res.status(500).json(createBadRes(err.message));
+  }
+};
+
 module.exports = {
   createSale,
   findSales,
   findSaleById,
+  deleteSaleById,
 };

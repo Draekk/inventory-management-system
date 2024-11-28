@@ -134,6 +134,27 @@ const findSaleById = async (id, withProducts) => {
 };
 
 /**
+ * Elimina una venta por su ID.
+ *
+ * @async
+ * @function deleteSaleById
+ * @param {number} id - El ID de la venta a eliminar.
+ * @returns {Promise<number>} - Una promesa que se resuelve con el número de filas eliminadas.
+ * @throws {NotFoundError} - Lanza un error si no se encuentra la venta a eliminar.
+ * @throws {Error} - Lanza un error si ocurre un problema durante la eliminación.
+ */
+const deleteSaleById = async (id) => {
+  try {
+    const data = await rep.deleteSaleById(id);
+    if (data < 1)
+      throw new NotFoundError("No se encontró la venta a eliminar.");
+    return data;
+  } catch (err) {
+    throw err;
+  }
+};
+
+/**
  * Reduce el stock de un producto y actualiza el registro en la base de datos.
  *
  * @async
@@ -168,4 +189,5 @@ module.exports = {
   createSale,
   findSales,
   findSaleById,
+  deleteSaleById,
 };

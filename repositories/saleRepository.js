@@ -93,8 +93,29 @@ const findSaleById = async (id, withProducts = false, transaction = null) => {
   }
 };
 
+/**
+ * Elimina una venta por su ID.
+ *
+ * @param {number} id - El ID de la venta a eliminar.
+ * @returns {Promise<number>} - Una promesa que resuelve con el número de filas eliminadas.
+ * @throws {Error} - Lanza un error si ocurre algún problema durante la eliminación.
+ */
+const deleteSaleById = async (id) => {
+  try {
+    const data = await Sale.destroy({
+      where: {
+        id,
+      },
+    });
+    return data;
+  } catch (err) {
+    throw err;
+  }
+};
+
 module.exports = {
   createSale,
   findSales,
   findSaleById,
+  deleteSaleById,
 };
